@@ -1,5 +1,4 @@
 ﻿using Swos.Domain.Models;
-using System.Linq;
 using System.Text;
 
 namespace Swos.Domain;
