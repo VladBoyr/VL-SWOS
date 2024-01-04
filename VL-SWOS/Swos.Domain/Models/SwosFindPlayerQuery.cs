@@ -17,4 +17,6 @@ public class SwosFindPlayerQuery
     public Optional<SwosSkill[]> PrimarySkills { get; set; }
     public Optional<byte> MinRating { get; set; }
     public Optional<byte> MaxRating { get; set; }
+    public Optional<int> MinPrice { get; set; }
+    public Optional<int> MaxPrice { get; set; }
 }

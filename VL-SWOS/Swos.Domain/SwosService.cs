@@ -822,7 +822,9 @@ public class SwosService : ISwosService
 
                     if (findResult && (
                         query.MinRating.HasValue ||
-                        query.MaxRating.HasValue))
+                        query.MaxRating.HasValue ||
+                        query.MinPrice.HasValue ||
+                        query.MaxPrice.HasValue))
                     {
                         var playerRating = await ReadPlayerRating(teamId, playerId);
 
@@ -831,6 +833,12 @@ public class SwosService : ISwosService
 
                         if (findResult && query.MaxRating.HasValue)
                             findResult = findResult && (playerRating <= query.MaxRating.Value);
+
+                        if (findResult && query.MinPrice.HasValue)
+                            findResult = findResult && (playerRating.ToPrice() >= query.MinPrice.Value);
+
+                        if (findResult && query.MaxPrice.HasValue)
+                            findResult = findResult && (playerRating.ToPrice() <= query.MaxPrice.Value);
                     }
 
                     if (findResult)

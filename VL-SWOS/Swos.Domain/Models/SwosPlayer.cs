@@ -12,4 +12,5 @@ public class SwosPlayer
     public SwosPosition Position { get; set; }
     public Dictionary<SwosSkill, SwosSkillValue> Skills { get; set; } = [];
     public byte Rating { get; set; }
+    public int Price => Rating.ToPrice();
 }

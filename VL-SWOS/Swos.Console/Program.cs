@@ -10,12 +10,17 @@ internal class Program
 
         var findPlayers = await swosService.FindPlayers(new SwosFindPlayerQuery
         {
-            FileTypes = [SwosFileType.AnyTeam],
-            MaxRating = 20,
+            FileTypes = [SwosFileType.Club],
+            MinPrice = 7000000,
+            Positions = new SwosPosition[]
+            {
+                SwosPosition.A
+            },
             MinSkills = new Dictionary<SwosSkill, byte>()
             {
-                { SwosSkill.Passing, 6 },
-                { SwosSkill.Speed, 6 }
+                { SwosSkill.Shooting, 7 },
+                { SwosSkill.Speed, 7 },
+                { SwosSkill.BallControl, 7 }
             }
         });
 
@@ -34,10 +39,14 @@ internal class Program
             Console.WriteLine($"Player Rating = {await swosService.ReadPlayerRating(findPlayer.TeamId, findPlayer.PlayerId)}");
             var (playerPosition, _) = await swosService.ReadPlayerPositionAndFace(findPlayer.TeamId, findPlayer.PlayerId);
             var skills = await swosService.ReadPlayerSkills(findPlayer.TeamId, findPlayer.PlayerId, playerPosition);
-            Console.WriteLine($"Player Passing = {skills[SwosSkill.Passing].SkillValue}");
-            Console.WriteLine($"Player Passing Primary = {skills[SwosSkill.Passing].PrimarySkill}");
-            Console.WriteLine($"Player Speed = {skills[SwosSkill.Speed].SkillValue}");
-            Console.WriteLine($"Player Speed Primary = {skills[SwosSkill.Speed].PrimarySkill}");
+            Console.WriteLine($"Passing = {skills[SwosSkill.Passing].SkillValue}");
+            Console.WriteLine($"Shooting = {skills[SwosSkill.Shooting].SkillValue}");
+            Console.WriteLine($"Heading = {skills[SwosSkill.Heading].SkillValue}");
+            Console.WriteLine($"Tackling = {skills[SwosSkill.Tackling].SkillValue}");
+            Console.WriteLine($"BallControl = {skills[SwosSkill.BallControl].SkillValue}");
+            Console.WriteLine($"Speed = {skills[SwosSkill.Speed].SkillValue}");
+            Console.WriteLine($"Finishing = {skills[SwosSkill.Finishing].SkillValue}");
+            Console.WriteLine();
         }
     }
 }
