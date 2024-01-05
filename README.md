@@ -34,4 +34,4 @@
 |1|_(in career mode)_ Cup Goals|
 |1|_(in career mode)_ LeagueCup Goals|
 |1|_(in career mode)_ EuroCup Goals|
-|1|Unknown|
+|1|_(in career mode)_ 154 - RES Player, 155 - TRIAL Player, 0-127 - Increase Player Value, 128-255 - Decrease Player Value|
