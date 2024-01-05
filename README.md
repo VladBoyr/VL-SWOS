@@ -22,7 +22,7 @@
 |||
 ||Player Structure|
 |1|Player Nationality|
-|1|_(in career mode)_ Real Player Value. Player Value tends to this value. When a player is not playing (injured or carded), this value is set to zero. When a player is placed on the wrong position (for example, CF on the CD), his real value is decreased.|
+|1|_(in career mode)_ Real Player Value. Player Value tends to this value. When a player is not playing (injured or carded), this value is set to zero. When a player is placed on the wrong position (for example, CF on the CD), this value is decreased.|
 |1|Player Number|
 |22|Player Name|
 |1|Unknown|
