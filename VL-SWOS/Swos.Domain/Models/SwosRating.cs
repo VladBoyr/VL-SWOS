@@ -59,4 +59,20 @@ public static class SwosRatingExtension
             _ => 0
         };
     }
+
+    public static int ToBonusRating(this byte swosData)
+    {
+        if (swosData > 127)
+            return -(256 - swosData) / 15;
+
+        return swosData / 15;
+    }
+
+    public static byte FromBonusRating(this int bonusRating)
+    {
+        if (bonusRating < 0)
+            return (byte)(256 - (-bonusRating * 15));
+
+        return (byte)(bonusRating * 15);
+    }
 }

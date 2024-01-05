@@ -17,4 +17,6 @@ public class SwosPlayer
     public SwosPlayerInjury Injury { get; set; }
     public SwosPlayerCard Card { get; set; }
     public SwosPlayerEurocupCard EurocupCard { get; set; }
+    public int BonusRating { get; set; }
+    public SwosPlayerTrial Trial { get; set; }
 }
