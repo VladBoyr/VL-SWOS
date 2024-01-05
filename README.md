@@ -10,7 +10,7 @@
 |1|Country number = {xxx} in "TEAM.xxx"|
 |1|Team Index in current TEAM.xxx file|
 |2|Team General Id (Unique for each team) (Big Endian order)|
-|1|(in competitions mode) If 01 then team controled by CPU, 02 by PLAYER and 03 by COACH|
+|1|_(in competitions mode)_ If 01 then team controled by CPU, 02 by PLAYER and 03 by COACH|
 |16|Team Name|
 |3|Unknown|
 |1|Team Tactic|
@@ -19,3 +19,17 @@
 |5|Away Kit Structure (1 - type of kit, 2-5 - colors)|
 |24|Coach Name|
 |16|Players index order|
+|||
+||Player Structure|
+|1|Player Nationality|
+|1|Unknown|
+|1|Player Number|
+|22|Player Name|
+|1|_(in career mode)_ Players Cards and Injures|
+|1|Position & Hair/Face Color|
+|1|Unknown|
+|4|Player Skills|
+|1|Player Value|
+|1|_(in career mode)_ League Goals|
+|1|_(in career mode)_ Cup Goals|
+|3|Unknown|
