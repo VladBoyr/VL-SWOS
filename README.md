@@ -22,7 +22,7 @@
 |||
 ||Player Structure|
 |1|Player Nationality|
-|1|Unknown|
+|1|_(in career mode)_ Real Player Value (Player Value tends to this value). When a player is not playing (injured or carded), this value is set to zero.|
 |1|Player Number|
 |22|Player Name|
 |1|Unknown|
