@@ -192,9 +192,6 @@ public static class SwosFileTypeExtension
 
     public static readonly Dictionary<byte, string> EurocupTeams = new()
     {
-        {250, "EUROCUP.TMD"},   // European Champions Cup
-        {251, "EUROCWC.TMD"},   // European Cup-Winners Cup
-        {252, "UEFACUP.TMD"}    // Uefa Cup
     };
 
     public static readonly Dictionary<byte, string> CustomTeams = new()
