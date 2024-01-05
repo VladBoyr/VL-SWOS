@@ -32,4 +32,6 @@
 |1|Player Value|
 |1|_(in career mode)_ League Goals|
 |1|_(in career mode)_ Cup Goals|
-|3|Unknown|
+|1|Unknown|
+|1|_(in career mode)_ Eurocup Goals|
+|1|Unknown|
