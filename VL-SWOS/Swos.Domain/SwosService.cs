@@ -20,6 +20,7 @@ public interface ISwosService : IDisposable
     Task<string> ReadTeamCoachName(int teamId);
     Task<SwosTactic> ReadTeamTactic(int teamId);
     Task<byte[]> ReadTeamPlayerPositions(int teamId);
+    Task<SwosTeamControl> ReadTeamControl(int teamId);
     Task<SwosTeam> ReadTeam(int teamId, bool includePlayers = false);
 
     Task<byte> ReadPlayerNumber(int teamId, int playerId);
@@ -39,6 +40,7 @@ public interface ISwosService : IDisposable
     Task WriteTeamCoachName(int teamId, string coachName);
     Task WriteTeamTactic(int teamId, SwosTactic teamTactic);
     Task WriteTeamPlayerPositions(int teamId, byte[] playerPositions);
+    Task WriteTeamControl(int teamId, SwosTeamControl teamControl);
     Task WriteTeam(int teamId, SwosTeam team);
 
     Task WritePlayerNumber(int teamId, int playerId, byte playerNumber);
@@ -243,6 +245,15 @@ public class SwosService : ISwosService
         return buffer;
     }
 
+    public async Task<SwosTeamControl> ReadTeamControl(int teamId)
+    {
+        swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + 4, SeekOrigin.Begin);
+        var buffer = new byte[1];
+        await swosFile.ReadAsync(buffer);
+
+        return (SwosTeamControl)buffer[0];
+    }
+
     public async Task<SwosTeam> ReadTeam(int teamId, bool includePlayers = false)
     {
         var globalTeamId = await ReadGlobalTeamId(teamId);
@@ -256,6 +267,7 @@ public class SwosService : ISwosService
         var tactic = await ReadTeamTactic(teamId);
         var playerPositions = await ReadTeamPlayerPositions(teamId);
         var players = includePlayers ? await ReadPlayers(teamId) : new SwosPlayer[SwosTeam.PlayersCount];
+        var teamControl = await ReadTeamControl(teamId);
 
         return new SwosTeam
         {
@@ -263,6 +275,7 @@ public class SwosService : ISwosService
             LocalId = localTeamId,
             Name = teamName,
             Country = teamCountry,
+            Control = teamControl,
             Division = teamDivision,
             HomeKit = homeKit,
             AwayKit = awayKit,
@@ -514,6 +527,13 @@ public class SwosService : ISwosService
         swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + 60, SeekOrigin.Begin);
         await swosFile.WriteAsync(playerPositions);
     }
+    public async Task WriteTeamControl(int teamId, SwosTeamControl teamControl)
+    {
+        swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + 4, SeekOrigin.Begin);
+        var buffer = new byte[1];
+        buffer[0] = (byte)teamControl;
+        await swosFile.WriteAsync(buffer);
+    }
 
     public async Task WriteTeam(int teamId, SwosTeam team)
     {
@@ -525,6 +545,7 @@ public class SwosService : ISwosService
         await WriteTeamCoachName(teamId, team.CoachName);
         await WriteTeamTactic(teamId, team.Tactic);
         await WriteTeamPlayerPositions(teamId, team.PlayerPositions);
+        await WriteTeamControl(teamId, team.Control);
     }
 
     public async Task WritePlayerNumber(int teamId, int playerId, byte playerNumber)
@@ -897,3 +918,68 @@ public class SwosService : ISwosService
         return findPlayers;
     }
 }
+
+/*
+1	(in career mode) Real Player Value. Player Value tends to this value. When a player is not playing (injured or carded), this value is set to zero. When a player is placed on the wrong position (for example, CF on the CD), this value is decreased.
+
+swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 1, SeekOrigin.Begin);
+var buffer = new byte[1];
+await swosFile.ReadAsync(buffer);
+
+1	(in career mode) Players Cards and Injures
+
+swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 27, SeekOrigin.Begin);
+var buffer = new byte[1];
+await swosFile.ReadAsync(buffer);
+
+1	(in career mode) 154 - RES Player, 155 - TRIAL Player, 0-127 - Increase Player Value, 128-255 - Decrease Player Value
+
+swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 37, SeekOrigin.Begin);
+var buffer = new byte[1];
+await swosFile.ReadAsync(buffer);
+
+
+
+
+
+242-255 (14) = 0
+227-241 (15) = -1
+212-226 (15) = -2
+197-211 (15) = -3
+182-196 (15) = -4
+167-181 (15) = -5
+156-166 (11) = -6
+152-153 (2)  = -6
+137-151 (15) = -7
+128-136 (9)  = -8
+155 = TRIAL
+154 = RES
+120-127 (15) = +8
+105-119 (15) = +7
+ 90-104 (15) = +6
+ 75-89  (15) = +5
+ 60-74  (15) = +4
+ 45-59  (15) = +3
+ 30-44  (15) = +2
+ 15-29  (15) = +1
+  0-14  (15) = 0
+
+
+
+0 = nothing
+1 = 1 red card
+2 = 2 red card
+3 = 3 red card
+4 = 1 yellow card (eurocup)
+8 = 1 red card (eurocup)
+12 = 2 red card (eurocup)
+16 = 3 red card (eurocup)
+32 = half-injury
+64 = 1 injury
+96 = 2 injury
+128 = 3 injury
+160 = 4 injury
+192 = ? injury
+224 = + injury
+
+*/
