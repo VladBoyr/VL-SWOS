@@ -14,4 +14,7 @@ public class SwosPlayer
     public byte Rating { get; set; }
     public int Price => Rating.ToPrice();
     public Dictionary<SwosGoalType, byte> Goals { get; set; } = [];
+    public SwosPlayerInjury Injury { get; set; }
+    public SwosPlayerCard Card { get; set; }
+    public SwosPlayerEurocupCard EurocupCard { get; set; }
 }

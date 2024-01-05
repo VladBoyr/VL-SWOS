@@ -30,6 +30,7 @@ public interface ISwosService : IDisposable
     Task<Dictionary<SwosSkill, SwosSkillValue>> ReadPlayerSkills(int teamId, int playerId, SwosPosition playerPosition);
     Task<byte> ReadPlayerRating(int teamId, int playerId);
     Task<Dictionary<SwosGoalType, byte>> ReadPlayerGoals(int teamId, int playerId);
+    Task<(SwosPlayerInjury, SwosPlayerCard, SwosPlayerEurocupCard)> ReadPlayerInjuryAndCards(int teamId, int playerId);
     Task<SwosPlayer> ReadPlayer(int teamId, int playerId);
     Task<SwosPlayer[]> ReadPlayers(int teamId);
 
@@ -50,6 +51,7 @@ public interface ISwosService : IDisposable
     Task WritePlayerSkills(int teamId, int playerId, SwosPosition playerPosition, Dictionary<SwosSkill, SwosSkillValue> playerSkills);
     Task WritePlayerRating(int teamId, int playerId, byte playerRating);
     Task WritePlayerGoals(int teamId, int playerId, Dictionary<SwosGoalType, byte> goals);
+    Task WritePlayerInjuryAndCards(int teamId, int playerId, SwosPlayerInjury playerInjury, SwosPlayerCard playerCard, SwosPlayerEurocupCard eurocupCard);
     Task WritePlayer(int teamId, int playerId, SwosPlayer player);
     Task WritePlayers(int teamId, SwosPlayer[] players);
 
@@ -420,6 +422,26 @@ public class SwosService : ISwosService
         return goals;
     }
 
+    public async Task<(SwosPlayerInjury, SwosPlayerCard, SwosPlayerEurocupCard)> ReadPlayerInjuryAndCards(int teamId, int playerId)
+    {
+        if (playerId < 0 || playerId >= SwosTeam.PlayersCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(playerId));
+        }
+
+        swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 27, SeekOrigin.Begin);
+        var buffer = new byte[1];
+        await swosFile.ReadAsync(buffer);
+
+        var cards = buffer[0] % 32;
+        var playerInjury = (SwosPlayerInjury)(buffer[0] - cards);
+
+        var playerCard = (SwosPlayerCard)(cards % 4);
+        var eurocupCard = (SwosPlayerEurocupCard)(cards - (byte)playerCard);
+
+        return (playerInjury, playerCard, eurocupCard);
+    }
+
     public async Task<SwosPlayer> ReadPlayer(int teamId, int playerId)
     {
         var playerNumber = await ReadPlayerNumber(teamId, playerId);
@@ -429,6 +451,7 @@ public class SwosService : ISwosService
         var playerSkills = await ReadPlayerSkills(teamId, playerId, playerPosition);
         var playerRating = await ReadPlayerRating(teamId, playerId);
         var playerGoals = await ReadPlayerGoals(teamId, playerId);
+        var (playerInjury, playerCard, eurocupCard) = await ReadPlayerInjuryAndCards(teamId, playerId);
 
         return new SwosPlayer
         {
@@ -439,7 +462,10 @@ public class SwosService : ISwosService
             Position = playerPosition,
             Skills = playerSkills,
             Rating = playerRating,
-            Goals = playerGoals
+            Goals = playerGoals,
+            Injury = playerInjury,
+            Card = playerCard,
+            EurocupCard = eurocupCard
         };
     }
 
@@ -663,6 +689,19 @@ public class SwosService : ISwosService
         await swosFile.WriteAsync(buffer);
     }
 
+    public async Task WritePlayerInjuryAndCards(int teamId, int playerId, SwosPlayerInjury playerInjury, SwosPlayerCard playerCard, SwosPlayerEurocupCard eurocupCard)
+    {
+        if (playerId < 0 || playerId >= SwosTeam.PlayersCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(playerId));
+        }
+
+        swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 27, SeekOrigin.Begin);
+        var buffer = new byte[1];
+        buffer[0] = (byte)((byte)playerInjury + (byte)playerCard + (byte)eurocupCard);
+        await swosFile.WriteAsync(buffer);
+    }
+
     public async Task WritePlayer(int teamId, int playerId, SwosPlayer player)
     {
         await WritePlayerNumber(teamId, playerId, player.Number);
@@ -672,6 +711,7 @@ public class SwosService : ISwosService
         await WritePlayerSkills(teamId, playerId, player.Position, player.Skills);
         await WritePlayerRating(teamId, playerId, player.Rating);
         await WritePlayerGoals(teamId, playerId, player.Goals);
+        await WritePlayerInjuryAndCards(teamId, playerId, player.Injury, player.Card, player.EurocupCard);
     }
 
     public async Task WritePlayers(int teamId, SwosPlayer[] players)
@@ -920,18 +960,6 @@ public class SwosService : ISwosService
 }
 
 /*
-1	(in career mode) Real Player Value. Player Value tends to this value. When a player is not playing (injured or carded), this value is set to zero. When a player is placed on the wrong position (for example, CF on the CD), this value is decreased.
-
-swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 1, SeekOrigin.Begin);
-var buffer = new byte[1];
-await swosFile.ReadAsync(buffer);
-
-1	(in career mode) Players Cards and Injures
-
-swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 27, SeekOrigin.Begin);
-var buffer = new byte[1];
-await swosFile.ReadAsync(buffer);
-
 1	(in career mode) 154 - RES Player, 155 - TRIAL Player, 0-127 - Increase Player Value, 128-255 - Decrease Player Value
 
 swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 37, SeekOrigin.Begin);
@@ -963,23 +991,4 @@ await swosFile.ReadAsync(buffer);
  30-44  (15) = +2
  15-29  (15) = +1
   0-14  (15) = 0
-
-
-
-0 = nothing
-1 = 1 red card
-2 = 2 red card
-3 = 3 red card
-4 = 1 yellow card (eurocup)
-8 = 1 red card (eurocup)
-12 = 2 red card (eurocup)
-16 = 3 red card (eurocup)
-32 = half-injury
-64 = 1 injury
-96 = 2 injury
-128 = 3 injury
-160 = 4 injury
-192 = ? injury
-224 = + injury
-
 */
