@@ -28,6 +28,7 @@ public interface ISwosService : IDisposable
     Task<(SwosPosition, SwosFace)> ReadPlayerPositionAndFace(int teamId, int playerId);
     Task<Dictionary<SwosSkill, SwosSkillValue>> ReadPlayerSkills(int teamId, int playerId, SwosPosition playerPosition);
     Task<byte> ReadPlayerRating(int teamId, int playerId);
+    Task<Dictionary<SwosGoalType, byte>> ReadPlayerGoals(int teamId, int playerId);
     Task<SwosPlayer> ReadPlayer(int teamId, int playerId);
     Task<SwosPlayer[]> ReadPlayers(int teamId);
 
@@ -46,6 +47,7 @@ public interface ISwosService : IDisposable
     Task WritePlayerPositionAndFace(int teamId, int playerId, SwosPosition playerPosition, SwosFace playerFace);
     Task WritePlayerSkills(int teamId, int playerId, SwosPosition playerPosition, Dictionary<SwosSkill, SwosSkillValue> playerSkills);
     Task WritePlayerRating(int teamId, int playerId, byte playerRating);
+    Task WritePlayerGoals(int teamId, int playerId, Dictionary<SwosGoalType, byte> goals);
     Task WritePlayer(int teamId, int playerId, SwosPlayer player);
     Task WritePlayers(int teamId, SwosPlayer[] players);
 
@@ -104,11 +106,11 @@ public class SwosService : ISwosService
 
             swosFile = new FileStream(swosPath + fileName, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
 
-            swosFile.Seek(1, SeekOrigin.Begin);
-            var buffer = new byte[1];
+            swosFile.Seek(0, SeekOrigin.Begin);
+            var buffer = new byte[2];
             await swosFile.ReadAsync(buffer);
 
-            swosTeamCount = buffer[0];
+            swosTeamCount = buffer[0] * 256 + buffer[1];
             swosFileName = fileName;
         }
         catch
@@ -385,6 +387,26 @@ public class SwosService : ISwosService
         return buffer[0];
     }
 
+    public async Task<Dictionary<SwosGoalType, byte>> ReadPlayerGoals(int teamId, int playerId)
+    {
+        if (playerId < 0 || playerId >= SwosTeam.PlayersCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(playerId));
+        }
+
+        swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 33, SeekOrigin.Begin);
+        var buffer = new byte[4];
+        await swosFile.ReadAsync(buffer);
+
+        var goals = new Dictionary<SwosGoalType, byte>();
+        foreach (var goalType in Enum.GetValues<SwosGoalType>())
+        {
+            goals.Add(goalType, buffer[(byte)goalType]);
+        }
+
+        return goals;
+    }
+
     public async Task<SwosPlayer> ReadPlayer(int teamId, int playerId)
     {
         var playerNumber = await ReadPlayerNumber(teamId, playerId);
@@ -393,6 +415,7 @@ public class SwosService : ISwosService
         var (playerPosition, playerFace) = await ReadPlayerPositionAndFace(teamId, playerId);
         var playerSkills = await ReadPlayerSkills(teamId, playerId, playerPosition);
         var playerRating = await ReadPlayerRating(teamId, playerId);
+        var playerGoals = await ReadPlayerGoals(teamId, playerId);
 
         return new SwosPlayer
         {
@@ -402,7 +425,8 @@ public class SwosService : ISwosService
             Face = playerFace,
             Position = playerPosition,
             Skills = playerSkills,
-            Rating = playerRating
+            Rating = playerRating,
+            Goals = playerGoals
         };
     }
 
@@ -602,6 +626,22 @@ public class SwosService : ISwosService
         await swosFile.WriteAsync(buffer);
     }
 
+    public async Task WritePlayerGoals(int teamId, int playerId, Dictionary<SwosGoalType, byte> goals)
+    {
+        if (playerId < 0 || playerId >= SwosTeam.PlayersCount)
+        {
+            throw new ArgumentOutOfRangeException(nameof(playerId));
+        }
+
+        swosFile.Seek(offsetTeam + teamId * SwosTeam.SwosSize + SwosTeam.HeaderSize + playerId * SwosPlayer.SwosSize + 33, SeekOrigin.Begin);
+        var buffer = new byte[4];
+        foreach (var goalType in Enum.GetValues<SwosGoalType>())
+        {
+            buffer[(byte)goalType] = goals.GetValueOrDefault(goalType, (byte)0);
+        }
+        await swosFile.WriteAsync(buffer);
+    }
+
     public async Task WritePlayer(int teamId, int playerId, SwosPlayer player)
     {
         await WritePlayerNumber(teamId, playerId, player.Number);
@@ -610,6 +650,7 @@ public class SwosService : ISwosService
         await WritePlayerPositionAndFace(teamId, playerId, player.Position, player.Face);
         await WritePlayerSkills(teamId, playerId, player.Position, player.Skills);
         await WritePlayerRating(teamId, playerId, player.Rating);
+        await WritePlayerGoals(teamId, playerId, player.Goals);
     }
 
     public async Task WritePlayers(int teamId, SwosPlayer[] players)

@@ -8,6 +8,12 @@ internal class Program
         var swosService = new SwosService();
         swosService.SetSwosPath(@"c:\Games\SW_SOCCR\DATA");
 
+        /*
+        var _ = await swosService.OpenSwosFile("team.031");
+        await swosService.WritePlayerRating(20, 1, 255);
+        swosService.CloseSwosFile();
+        */
+
         var findPlayers = await swosService.FindPlayers(new SwosFindPlayerQuery
         {
             FileTypes = [SwosFileType.Club],
