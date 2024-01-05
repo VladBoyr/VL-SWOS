@@ -25,9 +25,9 @@
 |1|Unknown|
 |1|Player Number|
 |22|Player Name|
-|1|_(in career mode)_ Players Cards and Injures|
-|1|Position & Hair/Face Color|
 |1|Unknown|
+|1|Position & Hair/Face Color|
+|1|_(in career mode)_ Players Cards and Injures|
 |4|Player Skills|
 |1|Player Value|
 |1|_(in career mode)_ League Goals|
