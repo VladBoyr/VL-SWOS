@@ -1,5 +1,6 @@
 # VL-SWOS
-Проект для футбольной игры [Sensible World Of Soccer](https://ru.wikipedia.org/wiki/Sensible_Soccer) ([en](https://en.wikipedia.org/wiki/Sensible_World_of_Soccer))
+Проект для футбольной игры [Sensible World Of Soccer](https://ru.wikipedia.org/wiki/Sensible_Soccer)
+Project for ([Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_World_of_Soccer))
 
 # Structure of TEAM.xxx file
 |Bytes|Description|
@@ -14,7 +15,7 @@
 |16|Team Name|
 |3|Unknown|
 |1|Team Tactic|
-|1|Division Number (If team isn't present in any league Then 04)|
+|1|Division Number (If team isn't present in any league then 04)|
 |5|Home Kit Structure (1 - type of kit, 2-5 - colors)|
 |5|Away Kit Structure (1 - type of kit, 2-5 - colors)|
 |24|Coach Name|
@@ -22,7 +23,7 @@
 |||
 ||Player Structure|
 |1|Player Nationality|
-|1|_(in career mode)_ Real Player Value. Player Value tends to this value. When a player is not playing (injured or carded), this value is set to zero. When a player is placed on the wrong position (for example, CF on the CD), this value is decreased.|
+|1|_(in career mode)_ Real Player Value. Player Value tends to this value. When a player is not playing (injured or carded), this value is set to zero. When a player is placed on the wrong position (for example, CF on CD), this value is decreased.|
 |1|Player Number|
 |22|Player Name|
 |1|Unknown|
