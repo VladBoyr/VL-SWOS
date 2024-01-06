@@ -51,6 +51,9 @@ Project for [Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_Wo
 |56160||76|Team structure (but Global Id isn't the same)|
 |56236||1140|All players in team (30 players * 38 bytes)|
 |57452||1|Total number of players in team (max 30 players)|
+|63326||?|National Cup Competition Structure (*.pre file structure but without user's tactics AND teams)|
+|66224||?|National League Cup Competition Structure (*.pre file structure but without user's tactics AND teams)|
+|89946||?|National League Competition Structure (*.pre file structure but without user's tactics AND teams)|
 |92856||2220|User's tactics (USER A, USER B, USER C, USER D, USER E, USER F) (6 tactics * 370 bytes)|
 |95135||2|Total number of teams playing in same competitions (include team of Player-Coach) (little-endian OR 1 byte)|
 |95137||N*684|Teams playing in same competitions (include team of Player-Coach)|
