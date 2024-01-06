@@ -39,22 +39,22 @@ Project for [Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_Wo
 # Structure of CAREER file (*.car)
 |Offset|Offset (hex)|Bytes|Description|
 |---|---|---|---|
-|0|0000|2|Total number of teams playing in EUROCUPS (little-endian OR 1 byte). 80 teams = 16 EUROPEAN CHAMPIONS CUP + 32 EUROPEAN CUP-WINNERS CUP + 32 UEFA CUP|
-|2|0002|54720|Teams playing in the EUROCUPS (80 teams * 684 bytes)|
-|54724|D5C4|1|Number of already played seasons (max 20 seasons). Set this value to zero If you want to play indefinitely.|
-|54748|D5DC|4|Bank Account of team (little-endian). Max = 100 millions.|
-|55098|D73A|2|MR./MS. of Player-Coach|
-|55103|D73F|8|First Name of Player-Coach|
-|55112|D748|12|Surname of Player-Coach|
-|55125|D755|1|Nationality of Player-Coach|
-|56128||30|Players index order (30 players). If player doesn't exists then 255 (FF)|
-|56160||76|Team structure (but Global Id isn't the same)|
-|56236||1140|All players in team (30 players * 38 bytes)|
-|57452||1|Total number of players in team (max 30 players)|
-|63326||?|National Cup Competition Structure (*.pre file structure but without user's tactics AND teams)|
-|66224||?|National League Cup Competition Structure (*.pre file structure but without user's tactics AND teams)|
-|68406||?|EuroCup Competition Structure (*.pre file structure but without user's tactics AND teams)|
-|89946||?|National League Competition Structure (*.pre file structure but without user's tactics AND teams)|
-|92856||2220|User's tactics (USER A, USER B, USER C, USER D, USER E, USER F) (6 tactics * 370 bytes)|
-|95135||2|Total number of teams playing in same competitions (include team of Player-Coach) (little-endian OR 1 byte)|
-|95137||N*684|Teams playing in same competitions (include team of Player-Coach)|
+|0|00000|2|Total number of teams playing in EUROCUPS (little-endian OR 1 byte). 80 teams = 16 EUROPEAN CHAMPIONS CUP + 32 EUROPEAN CUP-WINNERS CUP + 32 UEFA CUP|
+|2|00002|54720|Teams playing in the EUROCUPS (80 teams * 684 bytes)|
+|54724|0D5C4|1|Number of already played seasons (max 20 seasons). Set this value to zero If you want to play indefinitely.|
+|54748|0D5DC|4|Bank Account of team (little-endian). Max = 100 millions.|
+|55098|0D73A|2|MR./MS. of Player-Coach|
+|55103|0D73F|8|First Name of Player-Coach|
+|55112|0D748|12|Surname of Player-Coach|
+|55125|0D755|1|Nationality of Player-Coach|
+|56128|0DB40|30|Players index order (30 players). If player doesn't exists then 255 (FF)|
+|56160|0DB60|76|Team structure (but Global Id isn't the same)|
+|56236|0DBAC|1140|All players in team (30 players * 38 bytes)|
+|57452|0E06C|1|Total number of players in team (max 30 players)|
+|63326|0F75E|?|National Cup Competition Structure (*.pre file structure but without user's tactics AND teams)|
+|66224|102B0|?|National League Cup Competition Structure (*.pre file structure but without user's tactics AND teams)|
+|68406|10B36|?|EuroCup Competition Structure (*.pre file structure but without user's tactics AND teams)|
+|89946|15F5A|?|National League Competition Structure (*.pre file structure but without user's tactics AND teams)|
+|92856|16AB8|2220|User's tactics (USER A, USER B, USER C, USER D, USER E, USER F) (6 tactics * 370 bytes)|
+|95135|1739F|2|Total number of teams playing in same competitions (include team of Player-Coach) (little-endian OR 1 byte)|
+|95137|173A1|N*684|Teams playing in same competitions (include team of Player-Coach)|
