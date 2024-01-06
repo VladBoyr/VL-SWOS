@@ -4,12 +4,12 @@ Project for [Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_Wo
 # Structure of TEAM.xxx file
 |Bytes|Description|
 |---|---|
-|2|Total number of teams in current TEAM.xxx file (Big Endian order)|
+|2|Total number of teams in current TEAM.xxx file (big-endian)|
 |||
 ||Team Structure|
 |1|Country number = {xxx} in "TEAM.xxx"|
 |1|Team Index in current TEAM.xxx file|
-|2|Team General Id (Unique for each team) (Big Endian order)|
+|2|Team General Id (Unique for each team) (big-endian)|
 |1|_(in competitions mode)_ If 01 then team controled by CPU, 02 by PLAYER and 03 by COACH|
 |16|Team Name|
 |3|Unknown|
@@ -37,8 +37,9 @@ Project for [Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_Wo
 |1|_(in career mode)_ 154 - RES Player, 155 - TRIAL Player, 0-127 - Increase Player Value, 128-255 - Decrease Player Value|
 
 # Structure of CAREER file (*.car)
-|Offset|Bytes|Description|
-|---|---|---|
-|0|10944|Teams playing in the EUROPEAN CHAMPIONS CUP (16 teams * 684 bytes)|
-|10944||Teams playing in the EUROPEAN CHAMPIONS CUP (16 teams * 684 bytes)|
-|0|10944|Teams playing in the EUROPEAN CHAMPIONS CUP (16 teams * 684 bytes)|
+|Offset|Offset (hex)|Bytes|Description|
+|---|---|---|---|
+|0|0000|2|Total number of teams playing in EUROCUPS (little-endian OR 1 byte). 80 teams = 16 EUROPEAN CHAMPIONS CUP + 32 EUROPEAN CUP-WINNERS CUP + 32 UEFA CUP|
+|2|0002|54720|Teams playing in the EUROCUPS (80 teams * 684 bytes)|
+|54724|D5C4|1|Number of already played seasons (max 20 seasons). Set this value to zero If you want to play indefinitely.|
+|54748|D5D0|4|Bank Account of team (little-endian). Max = 100 millions.|
