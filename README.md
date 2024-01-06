@@ -1,6 +1,5 @@
 # VL-SWOS
-Проект для футбольной игры [Sensible World Of Soccer](https://ru.wikipedia.org/wiki/Sensible_Soccer)
-Project for ([Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_World_of_Soccer))
+Project for [Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_World_of_Soccer) / Проект для футбольной игры [Sensible World Of Soccer](https://ru.wikipedia.org/wiki/Sensible_Soccer)
 
 # Structure of TEAM.xxx file
 |Bytes|Description|
@@ -36,3 +35,10 @@ Project for ([Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_W
 |1|_(in career mode)_ LeagueCup Goals|
 |1|_(in career mode)_ EuroCup Goals|
 |1|_(in career mode)_ 154 - RES Player, 155 - TRIAL Player, 0-127 - Increase Player Value, 128-255 - Decrease Player Value|
+
+# Structure of CAREER file (*.car)
+|Offset|Bytes|Description|
+|---|---|---|
+|0|10944|Teams playing in the EUROPEAN CHAMPIONS CUP (16 teams * 684 bytes)|
+|10944||Teams playing in the EUROPEAN CHAMPIONS CUP (16 teams * 684 bytes)|
+|0|10944|Teams playing in the EUROPEAN CHAMPIONS CUP (16 teams * 684 bytes)|
