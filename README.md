@@ -42,4 +42,8 @@ Project for [Sensible World Of Soccer](https://en.wikipedia.org/wiki/Sensible_Wo
 |0|0000|2|Total number of teams playing in EUROCUPS (little-endian OR 1 byte). 80 teams = 16 EUROPEAN CHAMPIONS CUP + 32 EUROPEAN CUP-WINNERS CUP + 32 UEFA CUP|
 |2|0002|54720|Teams playing in the EUROCUPS (80 teams * 684 bytes)|
 |54724|D5C4|1|Number of already played seasons (max 20 seasons). Set this value to zero If you want to play indefinitely.|
-|54748|D5D0|4|Bank Account of team (little-endian). Max = 100 millions.|
+|54748|D5DC|4|Bank Account of team (little-endian). Max = 100 millions.|
+|55098|D73A|2|MR./MS.|
+|55103|D73F|8|First Name of Player-Coach|
+|55112|D748|12|Surname of Player-Coach|
+|55125|D755|1|Nationality of Player-Coach|
