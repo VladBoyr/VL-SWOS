@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Logging", "Common\Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Database", "Common\Common.Database\Common.Database.csproj", "{81F02866-2998-44FF-A143-8D441D6768D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SWOS.CareerMod", "SWOS.CareerMod\SWOS.CareerMod.csproj", "{9C3CAD75-1814-4A64-A37D-930638EDAB33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{81F02866-2998-44FF-A143-8D441D6768D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81F02866-2998-44FF-A143-8D441D6768D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81F02866-2998-44FF-A143-8D441D6768D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C3CAD75-1814-4A64-A37D-930638EDAB33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C3CAD75-1814-4A64-A37D-930638EDAB33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C3CAD75-1814-4A64-A37D-930638EDAB33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C3CAD75-1814-4A64-A37D-930638EDAB33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

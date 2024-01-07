@@ -18,6 +18,11 @@ public enum SwosFileType
 
 public static class SwosFileTypeExtension
 {
+    public static Dictionary<byte, string> GetSwosFiles(this SwosFileType fileType)
+    {
+        return (new[] { fileType }).GetSwosFiles();
+    }
+    
     public static Dictionary<byte, string> GetSwosFiles(this IEnumerable<SwosFileType> fileTypes)
     {
         IEnumerable<KeyValuePair<byte, string>> list = new List<KeyValuePair<byte, string>>();
