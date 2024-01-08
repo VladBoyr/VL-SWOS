@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 191
   Top = 114
-  Width = 739
+  Width = 764
   Height = 376
   Caption = 'SWOS Career Mod'
   Color = clBtnFace
@@ -41,9 +41,35 @@ object Form1: TForm1
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object Label1: TLabel
+    Left = 392
+    Top = 88
+    Width = 122
+    Height = 20
+    Caption = 'File TEAM.xxx: '
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 392
+    Top = 112
+    Width = 125
+    Height = 20
+    Caption = 'Choose TEAM: '
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object ComboBox1: TComboBox
-    Left = 48
-    Top = 104
+    Left = 72
+    Top = 96
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -206,8 +232,8 @@ object Form1: TForm1
       '72')
   end
   object ComboBox2: TComboBox
-    Left = 48
-    Top = 152
+    Left = 72
+    Top = 144
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -216,8 +242,8 @@ object Form1: TForm1
     Visible = False
   end
   object ComboBox7: TComboBox
-    Left = 200
-    Top = 152
+    Left = 224
+    Top = 144
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -295,8 +321,8 @@ object Form1: TForm1
       '149')
   end
   object ComboBox8: TComboBox
-    Left = 48
-    Top = 200
+    Left = 72
+    Top = 192
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -459,8 +485,8 @@ object Form1: TForm1
       #1044#1088#1091#1075#1072#1103)
   end
   object ComboBox10: TComboBox
-    Left = 48
-    Top = 224
+    Left = 72
+    Top = 216
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -478,8 +504,8 @@ object Form1: TForm1
       'AT')
   end
   object ComboBox3: TComboBox
-    Left = 48
-    Top = 128
+    Left = 72
+    Top = 120
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -738,8 +764,8 @@ object Form1: TForm1
       '-1')
   end
   object ComboBox4: TComboBox
-    Left = 48
-    Top = 176
+    Left = 72
+    Top = 168
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -748,8 +774,8 @@ object Form1: TForm1
     Visible = False
   end
   object ComboBox5: TComboBox
-    Left = 200
-    Top = 104
+    Left = 224
+    Top = 96
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -825,8 +851,8 @@ object Form1: TForm1
       '79')
   end
   object ComboBox6: TComboBox
-    Left = 200
-    Top = 128
+    Left = 224
+    Top = 120
     Width = 145
     Height = 21
     ItemHeight = 13
@@ -901,25 +927,20 @@ object Form1: TForm1
       '39'
       '88')
   end
-  object Button2: TButton
-    Left = 456
-    Top = 128
-    Width = 75
-    Height = 25
-    Caption = 'Load Team'
-    TabOrder = 9
-    Visible = False
-    OnClick = Button2Click
-  end
   object ComboBox11: TComboBox
-    Left = 200
-    Top = 176
-    Width = 145
-    Height = 21
-    ItemHeight = 13
-    TabOrder = 10
+    Left = 512
+    Top = 83
+    Width = 225
+    Height = 28
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ItemHeight = 20
+    ParentFont = False
+    TabOrder = 9
     Text = 'ComboBox11'
-    Visible = False
     OnChange = ComboBox11Change
     Items.Strings = (
       '0'
@@ -990,32 +1011,37 @@ object Form1: TForm1
       '79')
   end
   object ComboBox12: TComboBox
-    Left = 200
-    Top = 200
-    Width = 145
-    Height = 21
-    ItemHeight = 13
-    TabOrder = 11
+    Left = 512
+    Top = 109
+    Width = 225
+    Height = 28
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+    ItemHeight = 20
+    ParentFont = False
+    TabOrder = 10
     Text = 'ComboBox12'
-    Visible = False
   end
   object Button3: TButton
-    Left = 456
-    Top = 160
+    Left = 440
+    Top = 216
     Width = 75
     Height = 25
     Caption = 'Button3'
-    TabOrder = 12
+    TabOrder = 11
     Visible = False
     OnClick = Button3Click
   end
   object ProgressBar1: TProgressBar
     Left = 0
     Top = 304
-    Width = 723
+    Width = 748
     Height = 33
     Align = alBottom
-    TabOrder = 13
+    TabOrder = 12
     Visible = False
   end
   object lstSwosPath: TDirectoryListBox
@@ -1024,7 +1050,7 @@ object Form1: TForm1
     Width = 377
     Height = 257
     ItemHeight = 16
-    TabOrder = 14
+    TabOrder = 13
     OnChange = lstSwosPathChange
   end
   object btnCareer: TButton
@@ -1039,11 +1065,26 @@ object Form1: TForm1
     Font.Name = 'MS Sans Serif'
     Font.Style = [fsBold]
     ParentFont = False
-    TabOrder = 15
+    TabOrder = 14
     OnClick = btnCareerClick
   end
+  object btnRecordTeamToCareer: TButton
+    Left = 392
+    Top = 144
+    Width = 241
+    Height = 41
+    Caption = 'RECORD TEAM TO CAREER'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'MS Sans Serif'
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 15
+    OnClick = btnRecordTeamToCareerClick
+  end
   object OpenDialog1: TOpenDialog
-    Left = 544
-    Top = 112
+    Left = 384
+    Top = 8
   end
 end

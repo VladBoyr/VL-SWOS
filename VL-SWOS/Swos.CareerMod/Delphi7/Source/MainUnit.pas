@@ -48,7 +48,6 @@ type
     ComboBox4: TComboBox;
     ComboBox5: TComboBox;
     ComboBox6: TComboBox;
-    Button2: TButton;
     OpenDialog1: TOpenDialog;
     ComboBox11: TComboBox;
     ComboBox12: TComboBox;
@@ -58,6 +57,9 @@ type
     lblSwosPathCaption: TLabel;
     lstSwosPath: TDirectoryListBox;
     btnCareer: TButton;
+    btnRecordTeamToCareer: TButton;
+    Label1: TLabel;
+    Label2: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure RecordCustoms;
     procedure ChangeTeams;
@@ -73,12 +75,12 @@ type
     procedure WriteTreners;
     procedure WriteTeams;
     procedure ReadOriginalTeams;
-    procedure Button2Click(Sender: TObject);
     procedure ComboBox11Change(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure lstSwosPathChange(Sender: TObject);
     procedure btnCareerClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnRecordTeamToCareerClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -2051,7 +2053,116 @@ begin
  ProgressBar1.Visible := False;
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.ComboBox11Change(Sender: TObject);
+var i: integer;
+begin
+ if Length(NumTeams) = 0 then
+ begin
+   Year := Year + 1;
+   ReadTeams;
+   Year := Year - 1;
+ end;
+ ComboBox12.Items.Clear;
+ for i:=0 to NumTeams[ComboBox11.ItemIndex]-1 do
+  ComboBox12.Items.Add(Teams[ComboBox11.ItemIndex,i].Name);
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+var b,i: integer;
+    NC,NT: integer;
+begin
+ OpenDialog1.InitialDir := PROGDIR;
+ if OpenDialog1.Execute then
+  begin
+   AssignFile(FSWS, OpenDialog1.FileName);
+   {$I-}
+   Reset(FSWS);
+   {$I+}
+   if IOResult=0 then
+    begin
+     b:=55555;
+     NC:=ComboBox11.ItemIndex;
+     NT:=ComboBox12.ItemIndex;
+     c:=StrToInt(ComboBox5.Items.Strings[NC]);
+     Seek(FSWS,b+1);
+     Write(FSWS,c);
+     c:=NT;
+     Seek(FSWS,b+2);
+     Write(FSWS,c);
+     for i:=1 to 18 do
+      begin
+       c:=ORD(Teams[NC,NT].Name[i]);
+       if i>length(Teams[NC,NT].Name) then c:=0;
+       Seek(FSWS,b+i+2);
+       Write(FSWS,c);
+      end;
+     CloseFile(FSWS);
+    end;
+  end;
+end;
+
+procedure TForm1.lstSwosPathChange(Sender: TObject);
+begin
+ lblSwosPath.Caption := lstSwosPath.Directory;
+end;
+
+procedure TForm1.btnCareerClick(Sender: TObject);
+
+procedure CreateCareer;
+begin
+ ReadOriginalTeams;
+ NumPlayers:=0;
+ NumTreners:=0;
+ WritePlayers;
+ WriteTreners;
+ WriteTeams;
+end;
+
+procedure ChangeCareer;
+begin
+ ReadPlayers;
+ ReadTreners;
+ ReadTeams;
+ ChangeAge;
+ Transfers;
+ ChangeTeams;
+ CreateTactics;
+ WritePlayers;
+ WriteTreners;
+ WriteTeams;
+ RecordCustoms;
+end;
+
+var ini: TIniFile;
+
+begin
+ Year := Year + 1;
+
+ if Year=1 then CreateCareer
+           else ChangeCareer;
+
+ Caption := 'SWOS Career Mod. Year: ' + IntToStr(Year);
+
+ ini := TIniFile.Create(PROGDIR + '\Career.ini');
+ try
+  ini.WriteInteger('Main', 'Year', Year);
+ finally
+  ini.Free;
+ end;
+end;
+
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+var ini: TIniFile;
+begin
+  ini := TIniFile.Create(PROGDIR + '\Career.ini');
+  try
+    ini.WriteString('Main', 'SwosPath', lblSwosPath.Caption);
+  finally
+    ini.Free;
+  end;
+end;
+
+procedure TForm1.btnRecordTeamToCareerClick(Sender: TObject);
 var b,i,j: integer;
     NC,NT: integer;
 begin
@@ -2162,109 +2273,6 @@ begin
       end;
      CloseFile(FSWS);
     end;
-  end;
-end;
-
-procedure TForm1.ComboBox11Change(Sender: TObject);
-var i: integer;
-begin
- ComboBox12.Items.Clear;
- for i:=0 to NumTeams[ComboBox11.ItemIndex]-1 do
-  ComboBox12.Items.Add(Teams[ComboBox11.ItemIndex,i].Name);
-end;
-
-procedure TForm1.Button3Click(Sender: TObject);
-var b,i: integer;
-    NC,NT: integer;
-begin
- OpenDialog1.InitialDir := PROGDIR;
- if OpenDialog1.Execute then
-  begin
-   AssignFile(FSWS, OpenDialog1.FileName);
-   {$I-}
-   Reset(FSWS);
-   {$I+}
-   if IOResult=0 then
-    begin
-     b:=55555;
-     NC:=ComboBox11.ItemIndex;
-     NT:=ComboBox12.ItemIndex;
-     c:=StrToInt(ComboBox5.Items.Strings[NC]);
-     Seek(FSWS,b+1);
-     Write(FSWS,c);
-     c:=NT;
-     Seek(FSWS,b+2);
-     Write(FSWS,c);
-     for i:=1 to 18 do
-      begin
-       c:=ORD(Teams[NC,NT].Name[i]);
-       if i>length(Teams[NC,NT].Name) then c:=0;
-       Seek(FSWS,b+i+2);
-       Write(FSWS,c);
-      end;
-     CloseFile(FSWS);
-    end;
-  end;
-end;
-
-procedure TForm1.lstSwosPathChange(Sender: TObject);
-begin
- lblSwosPath.Caption := lstSwosPath.Directory;
-end;
-
-procedure TForm1.btnCareerClick(Sender: TObject);
-
-procedure CreateCareer;
-begin
- ReadOriginalTeams;
- NumPlayers:=0;
- NumTreners:=0;
- WritePlayers;
- WriteTreners;
- WriteTeams;
-end;
-
-procedure ChangeCareer;
-begin
- ReadPlayers;
- ReadTreners;
- ReadTeams;
- ChangeAge;
- Transfers;
- ChangeTeams;
- CreateTactics;
- WritePlayers;
- WriteTreners;
- WriteTeams;
- RecordCustoms;
-end;
-
-var ini: TIniFile;
-
-begin
- Year := Year + 1;
-
- if Year=1 then CreateCareer
-           else ChangeCareer;
-
- Caption := 'SWOS Career Mod. Year: ' + IntToStr(Year);
-
- ini := TIniFile.Create(PROGDIR + '\Career.ini');
- try
-  ini.WriteInteger('Main', 'Year', Year);
- finally
-  ini.Free;
- end;
-end;
-
-procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
-var ini: TIniFile;
-begin
-  ini := TIniFile.Create(PROGDIR + '\Career.ini');
-  try
-    ini.WriteString('Main', 'SwosPath', lblSwosPath.Caption);
-  finally
-    ini.Free;
   end;
 end;
 
