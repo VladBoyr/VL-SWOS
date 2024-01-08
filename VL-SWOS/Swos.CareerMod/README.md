@@ -8,21 +8,21 @@ URALMASH's rank = 851
 
 ### 2. Teams plan their transfers.
 Transfers Count = random[6..16]<br/><br/>
-Transfer Player's Team
+Choose Transfer Player's Team
 |Condition|Transfer Player's Team<|
 |---|---|
 |New Team Rank < 200|New Team Rank + random[0..400]|
 |New Team Rank > Last Team Rank - 200|New Team Rank + random[-400..0]|
 |Otherwise|New Team Rank + random[-200..200]|
 
-Transfer Player
+Choose Transfer Player
 |Condition|Transfer Player|
 |---|---|
 |ABS(New Team Rank - Transfer Player's Team Rank) <= 50|random[0..15] best player|
 |(New Team Rank - Transfer Player's Team Rank) > 50|random[8..15] best player|
 |(Transfer Player's Team Rank - New Team Rank) > 50|random[0..7] best player|
 
-New Transfer Player's Value<br/>
+Choose New Transfer Player's Value<br/>
 _(New Value depends on Player Position.)_
 |Condition|New Value|
 |---|---|
