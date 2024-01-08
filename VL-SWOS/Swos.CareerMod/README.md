@@ -9,6 +9,6 @@
 |M|6|6|1|6|6|6|1|
 |A|1|6|6|1|6|6|6|
 
-Primary Skills Count = random[0..7]
+Primary Skills Count = random[0..7]<br/>
 Best skills set as primary. If skills equals then random skill set as primary.
 
