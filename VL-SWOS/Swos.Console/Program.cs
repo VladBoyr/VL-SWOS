@@ -14,6 +14,27 @@ internal class Program
         swosService.CloseSwosFile();
         */
 
+        var findTeams = await swosService.FindTeams(new SwosFindTeamQuery
+        {
+            FileTypes = [SwosFileType.Club],
+            GlobalIds = new int[]
+            {
+                1777
+            }
+        });
+
+        foreach (var findTeam in findTeams)
+        {
+            var _ = await swosService.OpenSwosFile(findTeam.SwosFile);
+            var team = await swosService.ReadTeam(findTeam.TeamId);
+            Console.WriteLine($"File = {findTeam.SwosFile}");
+            Console.WriteLine($"Team Id = {findTeam.TeamId}");
+            Console.WriteLine($"Team Global Id = {team.GlobalId}");
+            Console.WriteLine($"Team Country = {team.Country}");
+            Console.WriteLine($"Team Name = {team.Name}");
+            Console.WriteLine();
+        }
+
         var findPlayers = await swosService.FindPlayers(new SwosFindPlayerQuery
         {
             FileTypes = [SwosFileType.Club],
