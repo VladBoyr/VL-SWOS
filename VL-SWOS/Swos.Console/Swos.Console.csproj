@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Swos.CareerMod\Swos.CareerMod.csproj" />
     <ProjectReference Include="..\Swos.Domain\Swos.Domain.csproj" />
   </ItemGroup>
 

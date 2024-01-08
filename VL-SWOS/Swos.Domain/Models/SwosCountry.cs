@@ -507,5 +507,5 @@ public static class SwosCountryExtension
         };
     }
 
-    public readonly static HashSet<SwosCountry> CountryShortname = [SwosCountry.POR, SwosCountry.ESP, SwosCountry.BRA];
+    public readonly static HashSet<SwosCountry> CountrySingleName = [SwosCountry.POR, SwosCountry.ESP, SwosCountry.BRA];
 }

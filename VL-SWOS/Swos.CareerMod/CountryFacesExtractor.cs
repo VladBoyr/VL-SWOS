@@ -18,27 +18,27 @@ namespace SWOS.CareerMod
 
             swosService.SetSwosPath(swosPath + @"\DATA\");
 
-            foreach (var swosFile in new SwosFileType[] { SwosFileType.Club, SwosFileType.NationalTeam, SwosFileType.CustomTeam }.GetSwosFiles())
+            foreach (var swosFile in new SwosFileType[] { SwosFileType.Club, SwosFileType.NationalTeam }.GetSwosFiles())
             {
                 var teamsCount = await swosService.OpenSwosFile(swosFile.Value);
                 for (int teamId = 0; teamId < teamsCount; teamId++)
                     for (int playerId = 0; playerId < SwosTeam.PlayersCount; playerId++)
                     {
-                        var country = await swosService.ReadPlayerCountry(teamId, playerId);
+                        var playerCountry = await swosService.ReadPlayerCountry(teamId, playerId);
                         var (_, playerFace) = await swosService.ReadPlayerPositionAndFace(teamId, playerId);
-                        countryFaces.TryAdd(country, []);
-                        countryFaces[country].TryAdd(playerFace, 0);
-                        countryFaces[country][playerFace]++;
+                        countryFaces.TryAdd(playerCountry, []);
+                        countryFaces[playerCountry].TryAdd(playerFace, 0);
+                        countryFaces[playerCountry][playerFace]++;
                     }
                 swosService.CloseSwosFile();
             }
             
-            if (!Directory.Exists(swosPath + $@"\COUNTRY\"))
-                Directory.CreateDirectory(swosPath + $@"\COUNTRY\");
+            if (!Directory.Exists(swosPath + $@"\Country\"))
+                Directory.CreateDirectory(swosPath + $@"\Country\");
 
             foreach (var (country, faces) in countryFaces)
             {
-                await File.WriteAllLinesAsync(swosPath + $@"\COUNTRY\{(byte)country:D3}.fac", faces.Select(x => $"{x.Key}={x.Value}"));
+                await File.WriteAllLinesAsync(swosPath + $@"\Country\{(byte)country:D3}.face", faces.Select(x => $"{x.Key}={x.Value}"));
             }
         }
     }

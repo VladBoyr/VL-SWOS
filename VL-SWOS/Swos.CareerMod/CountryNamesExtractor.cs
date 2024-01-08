@@ -16,10 +16,11 @@ namespace SWOS.CareerMod
         {
             var countryNames = new Dictionary<SwosCountry, Dictionary<string, int>>();
             var countrySurnames = new Dictionary<SwosCountry, Dictionary<string, int>>();
+            var countrySingleNames = new Dictionary<SwosCountry, Dictionary<bool, int>>();
 
             swosService.SetSwosPath(swosPath + @"\DATA\");
 
-            foreach (var swosFile in new SwosFileType[] { SwosFileType.Club, SwosFileType.NationalTeam, SwosFileType.CustomTeam }.GetSwosFiles())
+            foreach (var swosFile in new SwosFileType[] { SwosFileType.Club, SwosFileType.NationalTeam }.GetSwosFiles())
             {
                 var teamsCount = await swosService.OpenSwosFile(swosFile.Value);
                 for (int teamId = 0; teamId < teamsCount; teamId++)
@@ -27,14 +28,22 @@ namespace SWOS.CareerMod
                     {
                         var playerCountry = await swosService.ReadPlayerCountry(teamId, playerId);
                         var playerName = await swosService.ReadPlayerName(teamId, playerId);
-                        var names = playerName.Split(' ');
+                        var names = playerName.Split([' ', '.']);
                         if (names.Length == 1)
                         {
+                            countrySingleNames.TryAdd(playerCountry, []);
+                            countrySingleNames[playerCountry].TryAdd(true, 0);
+                            countrySingleNames[playerCountry][true]++;
+
                             AddName(countryNames, playerCountry, playerName);
                             AddName(countrySurnames, playerCountry, playerName);
                         }
                         else
                         {
+                            countrySingleNames.TryAdd(playerCountry, []);
+                            countrySingleNames[playerCountry].TryAdd(false, 0);
+                            countrySingleNames[playerCountry][false]++;
+
                             foreach (var name in names.Take(names.Length - 1))
                             {
                                 AddName(countryNames, playerCountry, name);
@@ -52,17 +61,22 @@ namespace SWOS.CareerMod
                 swosService.CloseSwosFile();
             }
             
-            if (!Directory.Exists(swosPath + $@"\COUNTRY\"))
-                Directory.CreateDirectory(swosPath + $@"\COUNTRY\");
+            if (!Directory.Exists(swosPath + $@"\Country\"))
+                Directory.CreateDirectory(swosPath + $@"\Country\");
 
             foreach (var (country, names) in countryNames)
             {
-                await SaveNamesToFile(swosPath + $@"\COUNTRY\{(byte)country:D3}.nam", names);                
+                await File.WriteAllLinesAsync(swosPath + $@"\Country\{(byte)country:D3}.name", names.Select(x => $"{x.Key}={x.Value}"));
             }
 
             foreach (var (country, surnames) in countrySurnames)
             {
-                await SaveNamesToFile(swosPath + $@"\COUNTRY\{(byte)country:D3}.fam", surnames);
+                await File.WriteAllLinesAsync(swosPath + $@"\Country\{(byte)country:D3}.surname", surnames.Select(x => $"{x.Key}={x.Value}"));
+            }
+
+            foreach (var (country, singleNames) in countrySingleNames.Where(x => SwosCountryExtension.CountrySingleName.Contains(x.Key)))
+            {
+                await File.WriteAllLinesAsync(swosPath + $@"\Country\{(byte)country:D3}.singlename", singleNames.Select(x => $"{x.Key}={x.Value}"));
             }
         }
 
@@ -71,12 +85,6 @@ namespace SWOS.CareerMod
             dictionary.TryAdd(country, []);
             dictionary[country].TryAdd(name, 0);
             dictionary[country][name]++;
-        }
-
-        private static async Task SaveNamesToFile(string fileName, Dictionary<string, int> dictionary)
-        {
-            var names = dictionary.Select(x => $"{x.Key}={x.Value}");
-            await File.WriteAllLinesAsync(fileName, names);
         }
     }
 }
