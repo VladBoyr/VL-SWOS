@@ -41,7 +41,7 @@ Transfer Player's Team selects 6 best transfer offers (with highest player value
 |Old Player Value < 12|Old Player Value + random[-3..7]|
 |Otherwise|Old Player Value + random[-5..5]|
 
-Older version - New Player Value doesn't depends on player age but should.
+Older version: New Player Value doesn't depends on player age but should.
 
 ### 5. Junior players become to problem positions. 
 
