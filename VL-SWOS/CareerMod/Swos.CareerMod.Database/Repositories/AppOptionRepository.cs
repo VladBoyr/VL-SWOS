@@ -5,8 +5,8 @@ namespace Swos.CareerMod.Database.Repositories;
 
 public interface IAppOptionRepository
 {
-    Task<T> Find<T>(string name, T defaultValue) where T : notnull;
-    void Add<T>(string name, T value) where T : notnull;
+    Task<AppOption?> Find(string name);
+    void Add(AppOption item);
 }
 
 public class AppOptionRepository : IAppOptionRepository
@@ -18,24 +18,15 @@ public class AppOptionRepository : IAppOptionRepository
         this.context = context;
     }
 
-    public async Task<T> Find<T>(string name, T defaultValue) where T : notnull
+    public Task<AppOption?> Find(string name)
     {
-        var appOption = await context.AppOptions
+        return context.AppOptions
             .Where(x => x.Name == name)
             .SingleOrDefaultAsync();
-        
-        if (appOption == null)
-            return defaultValue;
-
-        return (T)Convert.ChangeType(appOption.Value, typeof(T));
     }
 
-    public void Add<T>(string name, T value) where T : notnull
+    public void Add(AppOption item)
     {
-        context.AppOptions.Add(new AppOption
-        {
-            Name = name,
-            Value = value.ToString()!
-        });
+        context.AppOptions.Add(item);
     }
 }

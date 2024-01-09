@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Swos.CareerMod.Database\Swos.CareerMod.Database.csproj" />
+  </ItemGroup>
+
 </Project>
