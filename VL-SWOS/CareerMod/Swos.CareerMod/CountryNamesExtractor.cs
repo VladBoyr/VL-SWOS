@@ -1,7 +1,7 @@
 ﻿using Swos.Domain;
 using Swos.Domain.Models;
 
-namespace SWOS.CareerMod
+namespace Swos.CareerMod
 {
     public class CountryNamesExtractor
     {
@@ -60,7 +60,7 @@ namespace SWOS.CareerMod
                     }
                 swosService.CloseSwosFile();
             }
-            
+
             if (!Directory.Exists(swosPath + $@"\Country\"))
                 Directory.CreateDirectory(swosPath + $@"\Country\");
 
