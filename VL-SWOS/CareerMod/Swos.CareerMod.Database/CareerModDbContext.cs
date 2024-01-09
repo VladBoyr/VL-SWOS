@@ -11,6 +11,7 @@ public interface ICareerModDbContext : IDbContext
     DbSet<Coach> Coaches { get; set; }
     DbSet<Team> Teams { get; set; }
     DbSet<TeamKit> TeamKits { get; set; }
+    DbSet<AppOption> AppOptions { get; set; }
 }
 
 public class CareerModDbContext : CommonDbContext, ICareerModDbContext
@@ -24,6 +25,7 @@ public class CareerModDbContext : CommonDbContext, ICareerModDbContext
     public DbSet<Coach> Coaches { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<TeamKit> TeamKits { get; set; }
+    public DbSet<AppOption> AppOptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
