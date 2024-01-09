@@ -17,13 +17,13 @@ public class CommonDbContext : DbContext, IDbContext, IUnitOfWork
     {
         try
         {
-            logger.LogInformation("Миграция базы данных стартовала...");
+            logger.LogInformation("Starting of database migration...");
             await Database.MigrateAsync();
-            logger.LogInformation("Миграция базы данных завершена.");
+            logger.LogInformation("Database migration successfully finished.");
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Ошибка миграции базы данных");
+            logger.LogError(e, "Error during database migration.");
             throw;
         }
     }
