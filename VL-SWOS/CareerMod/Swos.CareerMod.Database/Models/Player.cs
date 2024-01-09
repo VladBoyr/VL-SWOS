@@ -5,6 +5,7 @@ namespace Swos.CareerMod.Database.Models;
 public class Player
 {
     public int Id { get; set; }
+    public int? TeamId { get; set; }
     public byte Number { get; set; }
     public string Name { get; set; } = "";
     public string Surname { get; set; } = "";
