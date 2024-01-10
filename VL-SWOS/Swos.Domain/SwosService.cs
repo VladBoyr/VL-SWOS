@@ -277,6 +277,7 @@ public class SwosService : ISwosService
         {
             GlobalId = globalTeamId,
             LocalId = localTeamId,
+            FileName = swosFileName,
             Name = teamName,
             Country = teamCountry,
             Control = teamControl,

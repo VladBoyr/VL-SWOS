@@ -10,6 +10,7 @@ public class SwosTeam
 
     public int GlobalId { get; set; }
     public int LocalId { get; set; }
+    public string FileName { get; set; } = "";
     public string Name { get; set; } = "";
     public SwosCountry Country { get; set; }
     public SwosTeamControl Control { get; set; }

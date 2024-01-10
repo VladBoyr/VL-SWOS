@@ -5,6 +5,9 @@ namespace Swos.CareerMod.Database.Models;
 public class Team
 {
     public int Id { get; set; }
+    public int GlobalId { get; set; }
+    public int LocalId { get; set; }
+    public string FileName { get; set; } = "";
     public string Name { get; set; } = "";
     public SwosCountry Country { get; set; }
     public int HomeKitId { get; set; }
@@ -14,5 +17,5 @@ public class Team
     public int CoachId { get; set; }
     public Coach Coach { get; set; } = new();
     public ICollection<Player> Players { get; set; } = [];
-    public int TeamRating { get; set; }
+    public byte TeamRating { get; set; }
 }

@@ -8,7 +8,6 @@ public class Player
     public int? TeamId { get; set; }
     public byte Number { get; set; }
     public string Name { get; set; } = "";
-    public string Surname { get; set; } = "";
     public byte Age { get; set; }
     public SwosCountry Country { get; set; }
     public SwosFace Face { get; set; }
