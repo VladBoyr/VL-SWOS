@@ -27,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Swos.CareerMod.Domain", "Ca
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.OptionalExtension.Json", "Common\Common.OptionalExtension.Json\Common.OptionalExtension.Json.csproj", "{21738D02-84A5-4EA1-9984-00C6521F1854}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.RandomExtension", "Common\Common.RandomExtension\Common.RandomExtension.csproj", "{FD48538D-6CBC-4713-AA94-7CD14D4A6C47}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{21738D02-84A5-4EA1-9984-00C6521F1854}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21738D02-84A5-4EA1-9984-00C6521F1854}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21738D02-84A5-4EA1-9984-00C6521F1854}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD48538D-6CBC-4713-AA94-7CD14D4A6C47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD48538D-6CBC-4713-AA94-7CD14D4A6C47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD48538D-6CBC-4713-AA94-7CD14D4A6C47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD48538D-6CBC-4713-AA94-7CD14D4A6C47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -86,6 +92,7 @@ Global
 		{3447171D-DF31-44AD-B7A7-1BA0FB7BF1B6} = {E4E1E57D-6231-411F-8DCF-E78B417385DF}
 		{17FC6A97-C35F-48E3-AA17-EEAE40B54ED9} = {E4E1E57D-6231-411F-8DCF-E78B417385DF}
 		{21738D02-84A5-4EA1-9984-00C6521F1854} = {4A7855D0-0DCF-4287-848A-EC4B94465EE5}
+		{FD48538D-6CBC-4713-AA94-7CD14D4A6C47} = {4A7855D0-0DCF-4287-848A-EC4B94465EE5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1817117E-E7AA-49FE-B09A-CE1BFB967EA5}
