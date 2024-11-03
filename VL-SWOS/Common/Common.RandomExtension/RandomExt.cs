@@ -27,7 +27,7 @@ public class RandomExt
         return valueAndRatioList[index].Item1;
     }
 
-    private static double[] NormalizeRatio(double[] ratioList)
+    public static double[] NormalizeRatio(double[] ratioList)
     {
         if (ratioList.Any(x => x < 0))
             throw new ($"Отрицательный коэффициент в '{nameof(ratioList)}' не допустим");
