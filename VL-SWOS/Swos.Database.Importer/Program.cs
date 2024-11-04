@@ -173,6 +173,12 @@ internal class Program
 
     private static async Task GlobalTeamLinksAutomate()
     {
+        Console.WriteLine("Auto SWOS Teams to Global Teams. Y/N?");
+        var inputKey = Console.ReadKey();
+        Console.WriteLine();
+        if (inputKey.KeyChar != 'Y' && inputKey.KeyChar != 'y')
+            return;
+
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
 
         foreach (var teamDatabase in teamDatabases)
@@ -210,6 +216,8 @@ internal class Program
 
         foreach (var teamDatabase in teamDatabases)
         {
+            Console.WriteLine($"Team Database: {teamDatabase.Title}");
+
             foreach (var team in teamDatabase.Teams)
             {
                 var globalTeamSwos = await globalTeamRepository.FindGlobalTeamSwos(team);
@@ -218,25 +226,15 @@ internal class Program
                     Console.WriteLine($"{team.Id}. {team.Name} ({team.Country})");
 
                     var globalTeams = await globalTeamRepository.FindGlobalTeams(team.Name, team.Country);
-                    if (globalTeams.Length == 0)
-                    {
-                        Console.WriteLine("Global Teams not found.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Global Teams found:");
-                        foreach (var globalTeam in globalTeams)
-                            foreach (var swosTeam in globalTeam.SwosTeams)
-                            {
-                                Console.WriteLine($"{globalTeam.Id}. {swosTeam.SwosTeam.Name} ({swosTeam.SwosTeam.Country})");
-                            }
-                    }
+                    GlobalTeamsShow(globalTeams);
 
-                    var inputIdStr = Console.ReadLine();
-                    if (!int.TryParse(inputIdStr, out var inputId))
+                    var inputStr = Console.ReadLine();
+                    var inputId = -1;
+                    while (!int.TryParse(inputStr, out inputId))
                     {
-                        Console.WriteLine("Okay, Exit!");
-                        return;
+                        globalTeams = await globalTeamRepository.FindGlobalTeamsByText(inputStr!);
+                        GlobalTeamsShow(globalTeams);
+                        inputStr = Console.ReadLine();
                     }
 
                     if (inputId >= 0)
@@ -264,6 +262,30 @@ internal class Program
                         await unitOfWork.SaveChangesAsync();
                     }
                 }
+            }
+        }
+    }
+
+    private static void GlobalTeamsShow(GlobalTeam[] globalTeams)
+    {
+        if (globalTeams.Length == 0)
+        {
+            Console.WriteLine("Global Teams not found.");
+        }
+        else
+        {
+            Console.WriteLine("Global Teams found:");
+            foreach (var globalTeam in globalTeams
+                .SelectMany(x => x.SwosTeams.Select(t =>
+                    new
+                    {
+                        GlobalTeamId = x.Id,
+                        TeamName = t.SwosTeam.Name,
+                        TeamCountry = t.SwosTeam.Country
+                    }))
+                .Distinct())
+            {
+                Console.WriteLine($"{globalTeam.GlobalTeamId}. {globalTeam.TeamName} ({globalTeam.TeamCountry})");
             }
         }
     }

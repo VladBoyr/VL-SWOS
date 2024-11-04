@@ -9,6 +9,7 @@ public interface IGlobalTeamRepository
     void Add(GlobalTeam team);
     Task<GlobalTeam[]> FindGlobalTeamsExactly(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
+    Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
     Task<GlobalTeamSwos?> FindGlobalTeamSwos(DbSwosTeam team);
 }
 
@@ -76,6 +77,18 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
         }
 
         return [.. thirdResult];
+    }
+
+    public Task<GlobalTeam[]> FindGlobalTeamsByText(string text)
+    {
+        return context
+            .GlobalTeams
+            .Include(x => x.SwosTeams)
+            .ThenInclude(x => x.SwosTeam)
+            .Where(x => x
+                .SwosTeams
+                .Any(t => t.SwosTeam.Name.Contains(text.ToUpper())))
+            .ToArrayAsync();
     }
 
     public Task<GlobalTeamSwos?> FindGlobalTeamSwos(DbSwosTeam team)
