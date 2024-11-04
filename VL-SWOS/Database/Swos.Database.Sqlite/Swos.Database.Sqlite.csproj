@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.Database.Sqlite\Common.Database.Sqlite.csproj" />
     <ProjectReference Include="..\Swos.Database\Swos.Database.csproj" />
   </ItemGroup>
 
