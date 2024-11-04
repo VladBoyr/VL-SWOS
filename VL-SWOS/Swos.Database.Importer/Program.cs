@@ -176,7 +176,7 @@ internal class Program
 
     private static async Task GlobalTeamStats()
     {
-        var globalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
+        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
 
         var totalGlobalTeamsCount = 0;
@@ -186,16 +186,18 @@ internal class Program
         {
             Console.WriteLine($"Team Database: {teamDatabase.Title}");
 
-            var globalTeamsCount = teamDatabase.Teams.Count(x => globalTeams.Contains(x.Id));
+            var globalTeamsCount = teamDatabase.Teams.Count(x => existGlobalTeams.Contains(x.Id));
             totalGlobalTeamsCount += globalTeamsCount;
             totalTeamsCount += teamDatabase.Teams.Count;
+            var globalPercent = Math.Round(100M * globalTeamsCount / teamDatabase.Teams.Count, 2, MidpointRounding.AwayFromZero);
 
-            Console.WriteLine($"Teams in Global: {globalTeamsCount}");
+            Console.WriteLine($"Teams in Global: {globalTeamsCount} ({globalPercent} %)");
             Console.WriteLine($"Teams: {teamDatabase.Teams.Count}");
         }
 
+        var totalPercent = Math.Round(100M * totalGlobalTeamsCount / totalTeamsCount, 2, MidpointRounding.AwayFromZero);
         Console.WriteLine("TOTAL");
-        Console.WriteLine($"Total Teams in Global: {totalGlobalTeamsCount}");
+        Console.WriteLine($"Total Teams in Global: {totalGlobalTeamsCount} ({totalPercent} %)");
         Console.WriteLine($"Total Teams: {totalTeamsCount}");
         Console.ReadLine();
     }
@@ -208,32 +210,32 @@ internal class Program
         if (inputKey.KeyChar != 'Y' && inputKey.KeyChar != 'y')
             return;
 
+        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
 
         foreach (var teamDatabase in teamDatabases)
         {
             Console.WriteLine($"Team Database: {teamDatabase.Title}");
 
-            foreach (var team in teamDatabase.Teams)
+            foreach (var team in teamDatabase.Teams.Where(x => !existGlobalTeams.Contains(x.Id)))
             {
-                var globalTeamSwos = await globalTeamRepository.FindGlobalTeamSwos(team);
-                if (globalTeamSwos == null)
+                var globalTeams = team.Name == "EMPTY"
+                    ? await globalTeamRepository.FindGlobalTeams(team.Name, team.Country)
+                    : await globalTeamRepository.FindGlobalTeamsExactly(team.Name, team.Country);
+
+                if (globalTeams.Length > 0 && globalTeams.Select(x => x.Id).Distinct().Count() == 1)
                 {
-                    var globalTeams = await globalTeamRepository.FindGlobalTeamsExactly(team.Name, team.Country);
-                    if (globalTeams.Length > 0 && globalTeams.Select(x => x.Id).Distinct().Count() == 1)
-                    {
-                        var globalTeam = globalTeams.First();
+                    var globalTeam = globalTeams.First();
 
-                        Console.WriteLine($"{team.Id}. {team.Name} ({team.Country}) => {globalTeam.Id}");
+                    Console.WriteLine($"{team.Id}. {team.Name} ({team.Country}) => {globalTeam.Id}");
 
-                        globalTeam.SwosTeams.Add(
-                            new GlobalTeamSwos
-                            {
-                                SwosTeamId = team.Id,
-                                SwosTeam = team
-                            });
-                        await unitOfWork.SaveChangesAsync();
-                    }
+                    globalTeam.SwosTeams.Add(
+                        new GlobalTeamSwos
+                        {
+                            SwosTeamId = team.Id,
+                            SwosTeam = team
+                        });
+                    await unitOfWork.SaveChangesAsync();
                 }
             }
         }
