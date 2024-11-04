@@ -36,8 +36,11 @@ internal class Program
         if (!File.Exists(teamDbInfoFile))
         {
             Console.WriteLine($"File '{teamDbInfoFile}' not found!");
+
+            await GlobalTeamStats();
             await GlobalTeamLinksAutomate();
             await GlobalTeamLinks();
+
             return;
         }
 
@@ -169,6 +172,32 @@ internal class Program
             SkillValue = skillValue.SkillValue,
             PrimarySkill = skillValue.PrimarySkill
         };
+    }
+
+    private static async Task GlobalTeamStats()
+    {
+        var globalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
+        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
+
+        var totalGlobalTeamsCount = 0;
+        var totalTeamsCount = 0;
+
+        foreach (var teamDatabase in teamDatabases)
+        {
+            Console.WriteLine($"Team Database: {teamDatabase.Title}");
+
+            var globalTeamsCount = teamDatabase.Teams.Count(x => globalTeams.Contains(x.Id));
+            totalGlobalTeamsCount += globalTeamsCount;
+            totalTeamsCount += teamDatabase.Teams.Count;
+
+            Console.WriteLine($"Teams in Global: {globalTeamsCount}");
+            Console.WriteLine($"Teams: {teamDatabase.Teams.Count}");
+        }
+
+        Console.WriteLine("TOTAL");
+        Console.WriteLine($"Total Teams in Global: {totalGlobalTeamsCount}");
+        Console.WriteLine($"Total Teams: {totalTeamsCount}");
+        Console.ReadLine();
     }
 
     private static async Task GlobalTeamLinksAutomate()

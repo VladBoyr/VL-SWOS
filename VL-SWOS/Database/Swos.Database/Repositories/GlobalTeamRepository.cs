@@ -11,6 +11,7 @@ public interface IGlobalTeamRepository
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
     Task<GlobalTeamSwos?> FindGlobalTeamSwos(DbSwosTeam team);
+    Task<GlobalTeamSwos[]> GetAllGlobalTeamsSwos();
 }
 
 public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRepository
@@ -97,5 +98,12 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
             .GlobalTeamSwos
             .Where(x => x.SwosTeamId == team.Id)
             .SingleOrDefaultAsync();
+    }
+
+    public Task<GlobalTeamSwos[]> GetAllGlobalTeamsSwos()
+    {
+        return context
+            .GlobalTeamSwos
+            .ToArrayAsync();
     }
 }
