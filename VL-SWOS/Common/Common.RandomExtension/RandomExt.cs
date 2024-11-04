@@ -2,6 +2,11 @@
 
 public class RandomExt
 {
+    public static int Range(int a, int b)
+    {
+        return new Random().Next(a, b + 1);
+    }
+
     public static T RandomValueByRatio<T>((T, double)[] valueAndRatioList)
     {
         if (valueAndRatioList == null)
