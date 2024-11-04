@@ -27,6 +27,11 @@ public class CareerModDbContext : CommonDbContext, ICareerModDbContext
     public DbSet<TeamKit> TeamKits { get; set; }
     public DbSet<AppOption> AppOptions { get; set; }
 
+    public override Task Backup()
+    {
+        throw new NotImplementedException();
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

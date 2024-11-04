@@ -4,14 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Common.Database;
 
-public class CommonDbContext : DbContext, IDbContext, IUnitOfWork
+public abstract class CommonDbContext : DbContext, IDbContext, IUnitOfWork
 {
-    private readonly ILogger logger;
+    protected readonly ILogger logger;
 
     public CommonDbContext(DbContextOptions options) : base(options)
     {
         logger = LogProvider.Create(GetType());
     }
+
+    public abstract Task Backup();
 
     public async Task Migrate()
     {

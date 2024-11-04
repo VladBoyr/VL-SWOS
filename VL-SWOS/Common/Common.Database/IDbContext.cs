@@ -2,5 +2,6 @@
 
 public interface IDbContext
 {
+    Task Backup();
     Task Migrate();
 }
