@@ -70,9 +70,8 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
                 .GlobalTeams
                 .Include(x => x.SwosTeams)
                 .ThenInclude(x => x.SwosTeam)
-                .Where(x => x
-                    .SwosTeams
-                    .Any(t => t.SwosTeam.Name.Contains(partName)))
+                .Where(x => x.SwosTeams.Any(t => t.SwosTeam.Name.Contains(partName)) &&
+                            !thirdResult.Select(exist => exist.Id).Contains(x.Id))
                 .ToArrayAsync();
             thirdResult.AddRange(thirdFound);
         }
@@ -80,16 +79,34 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
         return [.. thirdResult];
     }
 
-    public Task<GlobalTeam[]> FindGlobalTeamsByText(string text)
+    public async Task<GlobalTeam[]> FindGlobalTeamsByText(string text)
     {
-        return context
+        var findText = text.ToUpper();
+
+        var result = await context
             .GlobalTeams
             .Include(x => x.SwosTeams)
             .ThenInclude(x => x.SwosTeam)
             .Where(x => x
                 .SwosTeams
-                .Any(t => t.SwosTeam.Name.Contains(text.ToUpper())))
+                .Any(t => t.SwosTeam.Name.Contains(findText)))
             .ToArrayAsync();
+
+        if (Enum.TryParse<SwosCountry>(findText, out var findCountry))
+        {
+            var countryFound = await context
+                .GlobalTeams
+                .Include(x => x.SwosTeams)
+                .ThenInclude(x => x.SwosTeam)
+                .Where(x => x
+                    .SwosTeams
+                    .Any(t => t.SwosTeam.Country == findCountry))
+                .ToArrayAsync();
+
+            return [.. result, .. countryFound];
+        }
+
+        return [.. result];
     }
 
     public Task<GlobalTeamSwos?> FindGlobalTeamSwos(DbSwosTeam team)
