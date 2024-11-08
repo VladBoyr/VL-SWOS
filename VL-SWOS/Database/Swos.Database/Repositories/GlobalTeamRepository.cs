@@ -7,6 +7,7 @@ namespace Swos.Database.Repositories;
 public interface IGlobalTeamRepository
 {
     void Add(GlobalTeam team);
+    Task<GlobalTeam?> FindEmpty();
     Task<GlobalTeam[]> FindGlobalTeamsExactly(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
@@ -21,6 +22,14 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
     public void Add(GlobalTeam team)
     {
         context.GlobalTeams.Add(team);
+    }
+
+    public Task<GlobalTeam?> FindEmpty()
+    {
+        return context
+            .GlobalTeams
+            .Where(x => x.SwosTeams.Count == 0)
+            .FirstOrDefaultAsync();
     }
 
     public Task<GlobalTeam[]> FindGlobalTeamsExactly(string teamName, SwosCountry teamCountry)

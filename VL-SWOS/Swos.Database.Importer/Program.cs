@@ -274,8 +274,12 @@ internal class Program
 
                         if (inputId == 0)
                         {
-                            globalTeam = new GlobalTeam();
-                            globalTeamRepository.Add(globalTeam);
+                            globalTeam = await globalTeamRepository.FindEmpty();
+                            if (globalTeam == null)
+                            {
+                                globalTeam = new GlobalTeam();
+                                globalTeamRepository.Add(globalTeam);
+                            }
                         }
                         else
                         {
