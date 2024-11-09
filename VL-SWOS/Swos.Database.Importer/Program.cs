@@ -257,13 +257,16 @@ internal class Program
                 var globalTeams = await globalTeamRepository.FindGlobalTeams(team.Name, team.Country);
                 GlobalTeamsShow(globalTeams);
 
-                var inputStr = Console.ReadLine();
                 var inputId = -1;
+                var inputStr = Console.ReadLine();
+                await MergeGlobalTeams(globalTeams, inputStr);
+
                 while (!int.TryParse(inputStr, out inputId))
                 {
                     globalTeams = await globalTeamRepository.FindGlobalTeamsByText(inputStr!);
                     GlobalTeamsShow(globalTeams);
                     inputStr = Console.ReadLine();
+                    await MergeGlobalTeams(globalTeams, inputStr);
                 }
 
                 if (inputId >= 0)
@@ -319,6 +322,33 @@ internal class Program
             {
                 Console.WriteLine($"{globalTeam.GlobalTeamId}. {globalTeam.TeamName} ({globalTeam.TeamCountry})");
             }
+        }
+    }
+
+    private static async Task MergeGlobalTeams(GlobalTeam[] globalTeams, string? mergeQuery)
+    {
+        var mergeIds = mergeQuery?.Split(' ');
+        if (mergeIds?.Length == 2 &&
+            int.TryParse(mergeIds[0], out var fromMergeId) &&
+            int.TryParse(mergeIds[1], out var toMergeId))
+        {
+            var fromGlobalTeam = globalTeams.SingleOrDefault(x => x.Id == fromMergeId);
+            var toGlobalTeam = globalTeams.SingleOrDefault(x => x.Id == toMergeId);
+
+            if (fromGlobalTeam == null || toGlobalTeam == null)
+                return;
+
+            foreach (var fromTeam in fromGlobalTeam.SwosTeams)
+            {
+                toGlobalTeam.SwosTeams.Add(
+                    new GlobalTeamSwos
+                    {
+                        SwosTeamId = fromTeam.SwosTeam.Id,
+                        SwosTeam = fromTeam.SwosTeam
+                    });
+            }
+            fromGlobalTeam.SwosTeams.Clear();
+            await unitOfWork.SaveChangesAsync();
         }
     }
 }
