@@ -246,7 +246,7 @@ internal class Program
         var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
 
-        foreach (var teamDatabase in teamDatabases)
+        foreach (var teamDatabase in teamDatabases.OrderBy(x => x.Teams.Count(t => !existGlobalTeams.Contains(t.Id))))
         {
             Console.WriteLine($"Team Database: {teamDatabase.Title}");
 
