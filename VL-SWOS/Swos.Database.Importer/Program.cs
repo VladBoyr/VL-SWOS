@@ -243,59 +243,56 @@ internal class Program
 
     private static async Task GlobalTeamLinks()
     {
+        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
 
         foreach (var teamDatabase in teamDatabases)
         {
             Console.WriteLine($"Team Database: {teamDatabase.Title}");
 
-            foreach (var team in teamDatabase.Teams)
+            foreach (var team in teamDatabase.Teams.Where(x => !existGlobalTeams.Contains(x.Id)))
             {
-                var globalTeamSwos = await globalTeamRepository.FindGlobalTeamSwos(team);
-                if (globalTeamSwos == null)
+                Console.WriteLine($"{team.Id}. {team.Name} ({team.Country})");
+
+                var globalTeams = await globalTeamRepository.FindGlobalTeams(team.Name, team.Country);
+                GlobalTeamsShow(globalTeams);
+
+                var inputStr = Console.ReadLine();
+                var inputId = -1;
+                while (!int.TryParse(inputStr, out inputId))
                 {
-                    Console.WriteLine($"{team.Id}. {team.Name} ({team.Country})");
-
-                    var globalTeams = await globalTeamRepository.FindGlobalTeams(team.Name, team.Country);
+                    globalTeams = await globalTeamRepository.FindGlobalTeamsByText(inputStr!);
                     GlobalTeamsShow(globalTeams);
+                    inputStr = Console.ReadLine();
+                }
 
-                    var inputStr = Console.ReadLine();
-                    var inputId = -1;
-                    while (!int.TryParse(inputStr, out inputId))
+                if (inputId >= 0)
+                {
+                    GlobalTeam? globalTeam;
+
+                    if (inputId == 0)
                     {
-                        globalTeams = await globalTeamRepository.FindGlobalTeamsByText(inputStr!);
-                        GlobalTeamsShow(globalTeams);
-                        inputStr = Console.ReadLine();
+                        globalTeam = await globalTeamRepository.FindEmpty();
+                        if (globalTeam == null)
+                        {
+                            globalTeam = new GlobalTeam();
+                            globalTeamRepository.Add(globalTeam);
+                        }
+                    }
+                    else
+                    {
+                        globalTeam = globalTeams.SingleOrDefault(x => x.Id == inputId);
+                        if (globalTeam == null)
+                            return;
                     }
 
-                    if (inputId >= 0)
-                    {
-                        GlobalTeam? globalTeam;
-
-                        if (inputId == 0)
+                    globalTeam.SwosTeams.Add(
+                        new GlobalTeamSwos
                         {
-                            globalTeam = await globalTeamRepository.FindEmpty();
-                            if (globalTeam == null)
-                            {
-                                globalTeam = new GlobalTeam();
-                                globalTeamRepository.Add(globalTeam);
-                            }
-                        }
-                        else
-                        {
-                            globalTeam = globalTeams.SingleOrDefault(x => x.Id == inputId);
-                            if (globalTeam == null)
-                                return;
-                        }
-
-                        globalTeam.SwosTeams.Add(
-                            new GlobalTeamSwos
-                            {
-                                SwosTeamId = team.Id,
-                                SwosTeam = team
-                            });
-                        await unitOfWork.SaveChangesAsync();
-                    }
+                            SwosTeamId = team.Id,
+                            SwosTeam = team
+                        });
+                    await unitOfWork.SaveChangesAsync();
                 }
             }
         }
