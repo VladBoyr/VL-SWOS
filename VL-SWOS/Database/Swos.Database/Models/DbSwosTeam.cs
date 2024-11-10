@@ -6,6 +6,7 @@ public sealed class DbSwosTeam
 {
     public int Id { get; set; }
     public int TeamDatabaseId { get; set; }
+    public TeamDatabase TeamDatabase { get; set; } = null!;
     public int GlobalId { get; set; }
     public int LocalId { get; set; }
     public string FileName { get; set; } = "";
