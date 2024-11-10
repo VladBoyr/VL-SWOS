@@ -22,7 +22,6 @@ public sealed class TeamDatabaseRepository(ISwosDbContext context) : ITeamDataba
     {
         return context.TeamDatabases
             .Include(x => x.Teams)
-            .ThenInclude(x => x.TeamDatabase)
             .ToArrayAsync();
     }
 }

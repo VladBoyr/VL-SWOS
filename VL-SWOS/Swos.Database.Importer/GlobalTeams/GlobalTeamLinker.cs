@@ -11,7 +11,7 @@ public interface IGlobalTeamLinker
 {
     Task<(TeamDatabase, int)[]> GlobalTeamStats();
     Task LinksAutomate();
-    Task LinksTeam(DbSwosTeam team, GlobalTeam[] globalTeams, int globalTeamId);
+    Task<bool> LinksTeam(DbSwosTeam team, GlobalTeam[] globalTeams, int globalTeamId);
     Task<DbSwosTeam[]> TeamsToLink();
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
@@ -76,7 +76,7 @@ public sealed class GlobalTeamLinker(
         }
     }
 
-    public async Task LinksTeam(DbSwosTeam team, GlobalTeam[] globalTeams, int globalTeamId)
+    public async Task<bool> LinksTeam(DbSwosTeam team, GlobalTeam[] globalTeams, int globalTeamId)
     {
         GlobalTeam? globalTeam;
 
@@ -93,7 +93,7 @@ public sealed class GlobalTeamLinker(
         {
             globalTeam = globalTeams.SingleOrDefault(x => x.Id == globalTeamId);
             if (globalTeam == null)
-                return;
+                return false;
         }
 
         globalTeam.SwosTeams.Add(
@@ -103,6 +103,8 @@ public sealed class GlobalTeamLinker(
                 SwosTeam = team
             });
         await unitOfWork.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<DbSwosTeam[]> TeamsToLink()

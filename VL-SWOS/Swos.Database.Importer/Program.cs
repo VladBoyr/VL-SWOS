@@ -85,12 +85,10 @@ internal class Program
 
             var globalTeams = await globalTeamLinker.FindGlobalTeams(team.Name, team.Country);
             GlobalTeamsShow(globalTeams);
-
-            var inputId = -1;
-
             var inputStr = Console.ReadLine();
             await globalTeamLinker.MergeGlobalTeams(globalTeams, inputStr);
 
+            int inputId;
             while (!int.TryParse(inputStr, out inputId))
             {
                 globalTeams = await globalTeamLinker.FindGlobalTeamsByText(inputStr!);
@@ -102,7 +100,12 @@ internal class Program
 
             if (inputId >= 0)
             {
-                await globalTeamLinker.LinksTeam(team, globalTeams, inputId);
+                if (!(await globalTeamLinker.LinksTeam(team, globalTeams, inputId)))
+                    break;
+            }
+            else
+            {
+                continue;
             }
         }
     }
