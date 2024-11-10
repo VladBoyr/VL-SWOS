@@ -1,4 +1,4 @@
-﻿namespace Swos.Database.Importer;
+﻿namespace Swos.Database.Importer.ImportFromSwos;
 
 public sealed class TeamDatabaseCsv
 {
