@@ -14,6 +14,8 @@ public interface ISwosDbContext : IDbContext
     DbSet<DbSwosSkill> Skills { get; set; }
     DbSet<GlobalTeam> GlobalTeams { get; set; }
     DbSet<GlobalTeamSwos> GlobalTeamSwos { get; set; }
+    DbSet<GlobalPlayer> GlobalPlayers { get; set; }
+    DbSet<GlobalPlayerSwos> GlobalPlayerSwos { get; set; }
 }
 
 public abstract class SwosDbContext(DbContextOptions options) : CommonDbContext(options), ISwosDbContext
@@ -26,6 +28,8 @@ public abstract class SwosDbContext(DbContextOptions options) : CommonDbContext(
     public DbSet<DbSwosSkill> Skills { get; set; }
     public DbSet<GlobalTeam> GlobalTeams { get; set; }
     public DbSet<GlobalTeamSwos> GlobalTeamSwos { get; set; }
+    public DbSet<GlobalPlayer> GlobalPlayers { get; set; }
+    public DbSet<GlobalPlayerSwos> GlobalPlayerSwos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -68,6 +72,16 @@ public abstract class SwosDbContext(DbContextOptions options) : CommonDbContext(
             .HasOne(x => x.SwosTeam)
             .WithMany()
             .HasForeignKey(x => x.SwosTeamId);
+
+        modelBuilder.Entity<GlobalPlayer>()
+            .HasMany(x => x.SwosPlayers)
+            .WithOne()
+            .HasForeignKey(x => x.GlobalPlayerId);
+
+        modelBuilder.Entity<GlobalPlayerSwos>()
+            .HasOne(x => x.SwosPlayer)
+            .WithMany()
+            .HasForeignKey(x => x.SwosPlayerId);
 
         base.OnModelCreating(modelBuilder);
     }
