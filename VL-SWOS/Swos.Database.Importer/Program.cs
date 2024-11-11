@@ -1,7 +1,8 @@
-﻿using Swos.Database.Repositories;
+﻿using Swos.Database.Models;
+using Swos.Database.Repositories;
 using Swos.Database.Sqlite;
 using Swos.Domain;
-using Swos.Database.Models;
+using Swos.Domain.Models;
 
 namespace Swos.Database.Importer;
 
@@ -9,6 +10,7 @@ internal class Program
 {
     private static IImporterFromSwos importerFromSwos = null!;
     private static IGlobalTeamLinker globalTeamLinker = null!;
+    private static IGlobalPlayerLinker globalPlayerLinker = null!;
 
     static async Task Main()
     {
@@ -28,6 +30,10 @@ internal class Program
             new TeamDatabaseRepository(context),
             unitOfWork);
 
+        globalPlayerLinker = new GlobalPlayerLinker(
+            new GlobalPlayerRepository(context),
+            new TeamDatabaseRepository(context));
+
         Console.WriteLine("Swos 2020 path:");
         var swos2020path = Console.ReadLine();
         await importerFromSwos.ImportFromSwos2020(swos2020path ?? string.Empty);
@@ -35,6 +41,8 @@ internal class Program
         await GlobalTeamStats();
         await GlobalTeamLinksAutomate();
         await GlobalTeamLinks();
+
+        await GlobalPlayerStats();
     }
 
     private static async Task GlobalTeamStats()
@@ -132,5 +140,32 @@ internal class Program
                 Console.WriteLine($"{globalTeam.GlobalTeamId}. {globalTeam.TeamName} ({globalTeam.TeamCountry})");
             }
         }
+    }
+
+    private static async Task GlobalPlayerStats()
+    {
+        var playerDatabasesStats = await globalPlayerLinker.GlobalPlayerStats();
+
+        var totalGlobalPlayersCount = 0;
+        var totalPlayersCount = 0;
+
+        foreach (var (teamDatabase, globalPlayersCount) in playerDatabasesStats)
+        {
+            Console.WriteLine($"Team Database: {teamDatabase.Title}");
+
+            var playersCount = teamDatabase.Teams.Count * SwosTeam.PlayersCount;
+            totalGlobalPlayersCount += globalPlayersCount;
+            totalPlayersCount += playersCount;
+            var globalPercent = Math.Round(100M * globalPlayersCount / playersCount, 2, MidpointRounding.AwayFromZero);
+
+            Console.WriteLine($"Players in Global: {globalPlayersCount} ({globalPercent} %)");
+            Console.WriteLine($"Players: {playersCount}");
+        }
+
+        var totalPercent = Math.Round(100M * totalGlobalPlayersCount / totalPlayersCount, 2, MidpointRounding.AwayFromZero);
+        Console.WriteLine("TOTAL");
+        Console.WriteLine($"Total Players in Global: {totalGlobalPlayersCount} ({totalPercent} %)");
+        Console.WriteLine($"Total Players: {totalPlayersCount}");
+        Console.ReadLine();
     }
 }
