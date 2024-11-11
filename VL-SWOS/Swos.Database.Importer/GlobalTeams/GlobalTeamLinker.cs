@@ -31,7 +31,7 @@ public sealed class GlobalTeamLinker(
     public async Task<(TeamDatabase, int)[]> GlobalTeamStats()
     {
         var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
-        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
+        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
 
         var result = new List<(TeamDatabase, int)>();
         foreach (var teamDatabase in teamDatabases)
@@ -46,7 +46,7 @@ public sealed class GlobalTeamLinker(
     public async Task LinksAutomate()
     {
         var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
-        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
+        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
 
         foreach (var teamDatabase in teamDatabases)
         {
@@ -110,7 +110,7 @@ public sealed class GlobalTeamLinker(
     public async Task<DbSwosTeam[]> TeamsToLink()
     {
         var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
-        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases();
+        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
         var teams = new List<DbSwosTeam>();
 
         foreach (var teamDatabase in teamDatabases.OrderByDescending(x => x.Teams.Count(t => !existGlobalTeams.Contains(t.Id))))
