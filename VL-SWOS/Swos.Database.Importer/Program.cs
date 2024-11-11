@@ -32,7 +32,8 @@ internal class Program
 
         globalPlayerLinker = new GlobalPlayerLinker(
             new GlobalPlayerRepository(context),
-            new TeamDatabaseRepository(context));
+            new TeamDatabaseRepository(context),
+            unitOfWork);
 
         Console.WriteLine("Swos 2020 path:");
         var swos2020path = Console.ReadLine();
@@ -43,6 +44,7 @@ internal class Program
         await GlobalTeamLinks();
 
         await GlobalPlayerStats();
+        await GlobalPlayerLinksAutomate();
     }
 
     private static async Task GlobalTeamStats()
@@ -167,5 +169,16 @@ internal class Program
         Console.WriteLine($"Total Players in Global: {totalGlobalPlayersCount} ({totalPercent} %)");
         Console.WriteLine($"Total Players: {totalPlayersCount}");
         Console.ReadLine();
+    }
+
+    private static async Task GlobalPlayerLinksAutomate()
+    {
+        Console.WriteLine("Auto SWOS Players to Global Players. Y/N?");
+        var inputKey = Console.ReadKey();
+        Console.WriteLine();
+        if (inputKey.KeyChar != 'Y' && inputKey.KeyChar != 'y')
+            return;
+
+        await globalPlayerLinker.LinksAutomate();
     }
 }

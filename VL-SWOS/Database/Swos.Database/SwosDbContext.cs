@@ -50,7 +50,7 @@ public abstract class SwosDbContext(DbContextOptions options) : CommonDbContext(
 
         modelBuilder.Entity<DbSwosTeam>()
             .HasMany(x => x.Players)
-            .WithOne()
+            .WithOne(x => x.Team)
             .HasForeignKey(x => x.TeamId);
 
         modelBuilder.Entity<DbSwosTeamPlayer>()
