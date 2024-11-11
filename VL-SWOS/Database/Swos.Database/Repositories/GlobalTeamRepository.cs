@@ -109,7 +109,8 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
                 .ThenInclude(x => x.SwosTeam)
                 .Where(x => x
                     .SwosTeams
-                    .Any(t => t.SwosTeam.Country == findCountry))
+                    .Any(t => t.SwosTeam.Country == findCountry) &&
+                    !result.Select(gt => gt.Id).Contains(x.Id))
                 .ToArrayAsync();
 
             return [.. result, .. countryFound];
