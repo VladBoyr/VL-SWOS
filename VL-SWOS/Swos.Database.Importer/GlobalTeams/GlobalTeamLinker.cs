@@ -5,7 +5,7 @@ using Swos.Database.Models;
 using Swos.Database.Repositories;
 using Swos.Domain.Models;
 
-namespace Swos.Database.Importer;
+namespace Swos.Database.Importer.GlobalTeams;
 
 public interface IGlobalTeamLinker
 {
@@ -24,19 +24,16 @@ public sealed class GlobalTeamLinker(
     IUnitOfWork unitOfWork) : IGlobalTeamLinker
 {
     private readonly ILogger<GlobalTeamLinker> logger = LogProvider.Create<GlobalTeamLinker>();
-    private readonly IGlobalTeamRepository globalTeamRepository = globalTeamRepository;
-    private readonly ITeamDatabaseRepository teamDatabaseRepository = teamDatabaseRepository;
-    private readonly IUnitOfWork unitOfWork = unitOfWork;
 
     public async Task<(TeamDatabase, int)[]> GlobalTeamStats()
     {
-        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
+        var existGlobalTeamIds = await globalTeamRepository.GetAllGlobalTeamsSwosIds();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
 
         var result = new List<(TeamDatabase, int)>();
         foreach (var teamDatabase in teamDatabases)
         {
-            var globalTeamsCount = teamDatabase.Teams.Count(x => existGlobalTeams.Contains(x.Id));
+            var globalTeamsCount = teamDatabase.Teams.Count(x => existGlobalTeamIds.Contains(x.Id));
             result.Add((teamDatabase, globalTeamsCount));
         }
 
@@ -45,33 +42,51 @@ public sealed class GlobalTeamLinker(
 
     public async Task LinksAutomate()
     {
-        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
+        var existGlobalTeamIds = await globalTeamRepository.GetAllGlobalTeamsSwosIds();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
+
+        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeams(GlobalTeamDlo.SwosTeam))
+            .SelectMany(x => x.SwosTeams.Select(swos => new { GlobalTeam = x, TeamName = swos.SwosTeam.Name }))
+            .Distinct()
+            .GroupBy(x => x.TeamName)
+            .ToDictionary(g => g.Key,
+                g => g.Select(x => x.GlobalTeam)
+                    .ToArray());
 
         foreach (var teamDatabase in teamDatabases)
         {
             logger.LogInformation($"Team Database: {teamDatabase.Title}");
 
-            foreach (var team in teamDatabase.Teams.Where(x => !existGlobalTeams.Contains(x.Id)))
+            foreach (var team in teamDatabase.Teams.Where(x => !existGlobalTeamIds.Contains(x.Id)))
             {
-                var globalTeams = team.Name == "EMPTY"
-                    ? await globalTeamRepository.FindGlobalTeams(team.Name, team.Country)
-                    : await globalTeamRepository.FindGlobalTeamsExactly(team.Name, team.Country);
-
-                if (globalTeams.Length > 0 && globalTeams.Select(x => x.Id).Distinct().Count() == 1)
+                GlobalTeam[] globalTeams;
+                if (existGlobalTeams.TryGetValue(team.Name, out var foundGlobalTeams))
                 {
-                    var globalTeam = globalTeams.First();
-
-                    logger.LogInformation($"{team.Id}. {team.Name} ({team.Country}) => {globalTeam.Id}");
-
-                    globalTeam.SwosTeams.Add(
-                        new GlobalTeamSwos
-                        {
-                            SwosTeamId = team.Id,
-                            SwosTeam = team
-                        });
-                    await unitOfWork.SaveChangesAsync();
+                    globalTeams = foundGlobalTeams
+                        .Where(x => team.Name == "EMPTY" ||
+                            x.SwosTeams.Any(t => t.SwosTeam.Name == team.Name &&
+                                t.SwosTeam.Country == team.Country))
+                        .ToArray();
                 }
+                else
+                {
+                    continue;
+                }
+
+                if (globalTeams.Length <= 0 || globalTeams.Select(x => x.Id).Distinct().Count() != 1)
+                    continue;
+
+                var globalTeam = globalTeams.First();
+
+                logger.LogInformation($"{team.Id}. {team.Name} ({team.Country}) => {globalTeam.Id}");
+
+                globalTeam.SwosTeams.Add(
+                    new GlobalTeamSwos
+                    {
+                        SwosTeamId = team.Id,
+                        SwosTeam = team
+                    });
+                await unitOfWork.SaveChangesAsync();
             }
         }
     }
@@ -109,16 +124,15 @@ public sealed class GlobalTeamLinker(
 
     public async Task<DbSwosTeam[]> TeamsToLink()
     {
-        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeamsSwos()).Select(x => x.SwosTeamId).ToHashSet();
+        var existGlobalTeams = await globalTeamRepository.GetAllGlobalTeamsSwosIds();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
+
         var teams = new List<DbSwosTeam>();
 
-        foreach (var teamDatabase in teamDatabases.OrderByDescending(x => x.Teams.Count(t => !existGlobalTeams.Contains(t.Id))))
+        foreach (var teamDatabase in teamDatabases.OrderByDescending(x =>
+                     x.Teams.Count(t => !existGlobalTeams.Contains(t.Id))))
         {
-            foreach (var team in teamDatabase.Teams.Where(x => !existGlobalTeams.Contains(x.Id)))
-            {
-                teams.Add(team);
-            }
+            teams.AddRange(teamDatabase.Teams.Where(x => !existGlobalTeams.Contains(x.Id)));
         }
 
         return [.. teams];

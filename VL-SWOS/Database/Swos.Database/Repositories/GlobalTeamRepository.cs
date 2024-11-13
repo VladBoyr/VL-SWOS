@@ -4,6 +4,13 @@ using Swos.Domain.Models;
 
 namespace Swos.Database.Repositories;
 
+[Flags]
+public enum GlobalTeamDlo
+{
+    None = 0,
+    SwosTeam = 1,
+}
+
 public interface IGlobalTeamRepository
 {
     void Add(GlobalTeam team);
@@ -11,14 +18,12 @@ public interface IGlobalTeamRepository
     Task<GlobalTeam[]> FindGlobalTeamsExactly(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
-    Task<GlobalTeamSwos?> FindGlobalTeamSwos(DbSwosTeam team);
-    Task<GlobalTeamSwos[]> GetAllGlobalTeamsSwos();
+    Task<GlobalTeam[]> GetAllGlobalTeams(GlobalTeamDlo includeData);
+    Task<HashSet<int>> GetAllGlobalTeamsSwosIds();
 }
 
 public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRepository
 {
-    private readonly ISwosDbContext context = context;
-
     public void Add(GlobalTeam team)
     {
         context.GlobalTeams.Add(team);
@@ -119,18 +124,23 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
         return [.. result];
     }
 
-    public Task<GlobalTeamSwos?> FindGlobalTeamSwos(DbSwosTeam team)
+    public async Task<GlobalTeam[]> GetAllGlobalTeams(GlobalTeamDlo includeData)
     {
-        return context
-            .GlobalTeamSwos
-            .Where(x => x.SwosTeamId == team.Id)
-            .SingleOrDefaultAsync();
+        var query = context.GlobalTeams.AsQueryable();
+
+        if (includeData.HasFlag(GlobalTeamDlo.SwosTeam))
+            query = query
+                .Include(x => x.SwosTeams)
+                .ThenInclude(x => x.SwosTeam);
+
+        return await query.ToArrayAsync();
     }
 
-    public Task<GlobalTeamSwos[]> GetAllGlobalTeamsSwos()
+    public async Task<HashSet<int>> GetAllGlobalTeamsSwosIds()
     {
-        return context
-            .GlobalTeamSwos
-            .ToArrayAsync();
+        return (await context.GlobalTeamSwos
+                .Select(x => x.SwosTeamId)
+                .ToArrayAsync())
+            .ToHashSet();
     }
 }

@@ -20,8 +20,6 @@ public interface ITeamDatabaseRepository
 
 public sealed class TeamDatabaseRepository(ISwosDbContext context) : ITeamDatabaseRepository
 {
-    private readonly ISwosDbContext context = context;
-
     public void Add(TeamDatabase teamDb)
     {
         context.TeamDatabases.Add(teamDb);

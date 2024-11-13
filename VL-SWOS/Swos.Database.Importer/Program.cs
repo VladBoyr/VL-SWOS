@@ -1,4 +1,7 @@
-﻿using Swos.Database.Models;
+﻿using Swos.Database.Importer.GlobalPlayers;
+using Swos.Database.Importer.GlobalTeams;
+using Swos.Database.Importer.ImportFromSwos;
+using Swos.Database.Models;
 using Swos.Database.Repositories;
 using Swos.Database.Sqlite;
 using Swos.Domain;
@@ -6,38 +9,37 @@ using Swos.Domain.Models;
 
 namespace Swos.Database.Importer;
 
-internal class Program
+internal static class Program
 {
     private static IImporterFromSwos importerFromSwos = null!;
     private static IGlobalTeamLinker globalTeamLinker = null!;
     private static IGlobalPlayerLinker globalPlayerLinker = null!;
 
-    static async Task Main()
+    private static async Task Main()
     {
         var context = new SwosDbContextSqlite();
         await context.Backup();
         await context.Migrate();
-        var unitOfWork = context;
 
         importerFromSwos = new ImporterFromSwos(
             new SwosService(),
             new TeamDatabaseRepository(context),
             new TeamKitRepository(context),
-            unitOfWork);
+            context);
 
         globalTeamLinker = new GlobalTeamLinker(
             new GlobalTeamRepository(context),
             new TeamDatabaseRepository(context),
-            unitOfWork);
+            context);
 
         globalPlayerLinker = new GlobalPlayerLinker(
             new GlobalPlayerRepository(context),
             new TeamDatabaseRepository(context),
-            unitOfWork);
+            context);
 
         Console.WriteLine("Swos 2020 path:");
-        var swos2020path = Console.ReadLine();
-        await importerFromSwos.ImportFromSwos2020(swos2020path ?? string.Empty);
+        var swos2020Path = Console.ReadLine();
+        await importerFromSwos.ImportFromSwos2020(swos2020Path ?? string.Empty);
 
         await GlobalTeamStats();
         await GlobalTeamLinksAutomate();
@@ -110,12 +112,8 @@ internal class Program
 
             if (inputId >= 0)
             {
-                if (!(await globalTeamLinker.LinksTeam(team, globalTeams, inputId)))
+                if (!await globalTeamLinker.LinksTeam(team, globalTeams, inputId))
                     break;
-            }
-            else
-            {
-                continue;
             }
         }
     }

@@ -1,19 +1,18 @@
-﻿using Common.Database;
+﻿using System.Globalization;
+using Common.Database;
 using Common.Logging;
 using CsvHelper;
 using Microsoft.Extensions.Logging;
-using Swos.Database.Importer.ImportFromSwos;
 using Swos.Database.Models;
 using Swos.Database.Repositories;
 using Swos.Domain;
 using Swos.Domain.Models;
-using System.Globalization;
 
-namespace Swos.Database.Importer;
+namespace Swos.Database.Importer.ImportFromSwos;
 
 public interface IImporterFromSwos
 {
-    Task ImportFromSwos2020(string swos2020path);
+    Task ImportFromSwos2020(string swos2020Path);
 }
 
 public sealed class ImporterFromSwos(
@@ -23,14 +22,10 @@ public sealed class ImporterFromSwos(
     IUnitOfWork unitOfWork) : IImporterFromSwos
 {
     private readonly ILogger<ImporterFromSwos> logger = LogProvider.Create<ImporterFromSwos>();
-    private readonly ISwosService swosService = swosService;
-    private readonly ITeamDatabaseRepository teamDatabaseRepository = teamDatabaseRepository;
-    private readonly ITeamKitRepository teamKitRepository = teamKitRepository;
-    private readonly IUnitOfWork unitOfWork = unitOfWork;
     
-    public async Task ImportFromSwos2020(string swos2020path)
+    public async Task ImportFromSwos2020(string swos2020Path)
     {
-        var dlcTeamDbPath = $"{swos2020path}/dlc/teamdb/";
+        var dlcTeamDbPath = $"{swos2020Path}/dlc/teamdb/";
         var teamDbInfoFile = $"{dlcTeamDbPath}teamdb-info.csv";
 
         if (!File.Exists(teamDbInfoFile))
@@ -45,13 +40,13 @@ public sealed class ImporterFromSwos(
         var teamDatabases = csv.GetRecords<TeamDatabaseCsv>();
         foreach (var teamDatabaseCsv in teamDatabases)
         {
-            await ImportDatabase(swos2020path, teamDatabaseCsv);
+            await ImportDatabase(swos2020Path, teamDatabaseCsv);
         }
     }
 
-    private async Task ImportDatabase(string swos2020path, TeamDatabaseCsv teamDatabaseCsv)
+    private async Task ImportDatabase(string swos2020Path, TeamDatabaseCsv teamDatabaseCsv)
     {
-        swosService.SetSwosPath($"{swos2020path}/{teamDatabaseCsv.Name}/data");
+        swosService.SetSwosPath($"{swos2020Path}/{teamDatabaseCsv.Name}/data");
 
         var teams = new List<DbSwosTeam>();
 
@@ -119,20 +114,20 @@ public sealed class ImporterFromSwos(
             teamKit.ShortsColor,
             teamKit.SocksColor);
 
-        if (teamKitDb == null)
-        {
-            teamKitDb = new DbSwosKit
-            {
-                KitType = teamKit.KitType,
-                ShirtMainColor = teamKit.ShirtMainColor,
-                ShirtExtraColor = teamKit.ShirtExtraColor,
-                ShortsColor = teamKit.ShortsColor,
-                SocksColor = teamKit.SocksColor
-            };
+        if (teamKitDb != null)
+            return teamKitDb;
 
-            teamKitRepository.Add(teamKitDb);
-            await unitOfWork.SaveChangesAsync();
-        }
+        teamKitDb = new DbSwosKit
+        {
+            KitType = teamKit.KitType,
+            ShirtMainColor = teamKit.ShirtMainColor,
+            ShirtExtraColor = teamKit.ShirtExtraColor,
+            ShortsColor = teamKit.ShortsColor,
+            SocksColor = teamKit.SocksColor
+        };
+
+        teamKitRepository.Add(teamKitDb);
+        await unitOfWork.SaveChangesAsync();
 
         return teamKitDb;
     }
