@@ -45,7 +45,7 @@ public sealed class GlobalTeamLinker(
         var existGlobalTeamIds = await globalTeamRepository.GetAllGlobalTeamsSwosIds();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
 
-        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeams(GlobalTeamDlo.SwosTeam))
+        var existGlobalTeams = (await globalTeamRepository.GetAllGlobalTeams())
             .SelectMany(x => x.SwosTeams.Select(swos => new { GlobalTeam = x, TeamName = swos.SwosTeam.Name }))
             .Distinct()
             .GroupBy(x => x.TeamName)
@@ -59,24 +59,9 @@ public sealed class GlobalTeamLinker(
 
             foreach (var team in teamDatabase.Teams.Where(x => !existGlobalTeamIds.Contains(x.Id)))
             {
-                GlobalTeam[] globalTeams;
-                if (existGlobalTeams.TryGetValue(team.Name, out var foundGlobalTeams))
-                {
-                    globalTeams = foundGlobalTeams
-                        .Where(x => team.Name == "EMPTY" ||
-                            x.SwosTeams.Any(t => t.SwosTeam.Name == team.Name &&
-                                t.SwosTeam.Country == team.Country))
-                        .ToArray();
-                }
-                else
-                {
+                var globalTeam = FindGlobalTeamExactly(existGlobalTeams, team.Name, team.Country);
+                if (globalTeam == null)
                     continue;
-                }
-
-                if (globalTeams.Length <= 0 || globalTeams.Select(x => x.Id).Distinct().Count() != 1)
-                    continue;
-
-                var globalTeam = globalTeams.First();
 
                 logger.LogInformation($"{team.Id}. {team.Name} ({team.Country}) => {globalTeam.Id}");
 
@@ -86,8 +71,9 @@ public sealed class GlobalTeamLinker(
                         SwosTeamId = team.Id,
                         SwosTeam = team
                     });
-                await unitOfWork.SaveChangesAsync();
             }
+            
+            await unitOfWork.SaveChangesAsync();
         }
     }
 
@@ -170,8 +156,34 @@ public sealed class GlobalTeamLinker(
                         SwosTeam = fromTeam.SwosTeam
                     });
             }
+
             fromGlobalTeam.SwosTeams.Clear();
             await unitOfWork.SaveChangesAsync();
         }
+    }
+
+    private static GlobalTeam? FindGlobalTeamExactly(
+        Dictionary<string, GlobalTeam[]> existGlobalTeams,
+        string teamName,
+        SwosCountry teamCountry)
+    {
+        GlobalTeam[] globalTeams;
+        if (existGlobalTeams.TryGetValue(teamName, out var foundGlobalTeams))
+        {
+            globalTeams = foundGlobalTeams
+                .Where(x => teamName == "EMPTY" ||
+                            x.SwosTeams.Any(t => t.SwosTeam.Name == teamName &&
+                                                 t.SwosTeam.Country == teamCountry))
+                .ToArray();
+        }
+        else
+        {
+            return null;
+        }
+
+        if (globalTeams.Length == 0 || globalTeams.Select(x => x.Id).Distinct().Count() != 1)
+            return null;
+
+        return globalTeams.First();
     }
 }

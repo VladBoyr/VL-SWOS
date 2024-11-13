@@ -21,10 +21,7 @@ public sealed class GlobalPlayerLinker(
 
     public async Task<(TeamDatabase, int)[]> GlobalPlayerStats()
     {
-        var existGlobalPlayers = (await globalPlayerRepository.GetAllGlobalPlayersSwos())
-            .Select(x => x.SwosPlayerId)
-            .ToHashSet();
-
+        var existGlobalPlayers = await globalPlayerRepository.GetAllGlobalPlayersSwosIds();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.TeamPlayers);
 
         var result = new List<(TeamDatabase, int)>();
@@ -42,24 +39,58 @@ public sealed class GlobalPlayerLinker(
 
     public async Task LinksAutomate()
     {
-        var existGlobalPlayers = (await globalPlayerRepository.GetAllGlobalPlayersSwos())
-            .Select(x => x.SwosPlayerId)
-            .ToHashSet();
-
+        var existGlobalPlayerIds = await globalPlayerRepository.GetAllGlobalPlayersSwosIds();
         var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Players);
 
+        var teamToPlayerIds = (await globalPlayerRepository.GetAllGlobalTeamPlayers())
+            .SelectMany(x => x.SwosTeams.Select(swos => new { GlobalTeam = x, TeamId = swos.SwosTeamId }))
+            .Distinct()
+            .GroupBy(x => x.TeamId)
+            .ToDictionary(g => g.Key,
+                g => g.SelectMany(x => x.GlobalTeam.SwosTeams)
+                    .SelectMany(x => x.SwosTeam.Players)
+                    .Select(x => x.PlayerId)
+                    .Distinct()
+                    .ToArray());
+
+        var existGlobalPlayers = (await globalPlayerRepository.GetAllGlobalPlayers())
+            .SelectMany(x => x.SwosPlayers.Select(swos => new
+            {
+                GlobalPlayer = x,
+                PlayerId = swos.SwosPlayerId,
+                PlayerName = swos.SwosPlayer.Name
+            }))
+            .Distinct()
+            .GroupBy(x => x.PlayerId)
+            .ToDictionary(g => g.Key,
+                g => g.Select(x => (x.PlayerName, x.GlobalPlayer))
+                    .ToArray());
+
+        var existGlobalPlayersFinal = teamToPlayerIds
+            .ToDictionary(g => g.Key,
+                g => g.Value
+                    .SelectMany(x => existGlobalPlayers
+                        .TryGetValue(x, out var result) ? result : [])
+                    .GroupBy(x => x.PlayerName)
+                    .ToDictionary(grp => grp.Key,
+                        grp => grp.Select(x => x.GlobalPlayer)
+                            .Distinct()
+                            .ToArray()));
+        
         foreach (var teamDatabase in teamDatabases)
         {
             logger.LogInformation($"Team Database: {teamDatabase.Title}");
 
-            foreach (var player in teamDatabase.Teams.SelectMany(x => x.Players).Where(x => !existGlobalPlayers.Contains(x.Id)))
+            foreach (var player in teamDatabase.Teams.SelectMany(x => x.Players)
+                         .Where(x => !existGlobalPlayerIds.Contains(x.Id)))
             {
-                var globalPlayers = await globalPlayerRepository.FindGlobalPlayersExactly(player.Player.Name, player.Team);
+                var globalPlayer = FindGlobalPlayerExactly(
+                    existGlobalPlayersFinal,
+                    player.Player.Name,
+                    player.Team);
 
-                if (globalPlayers.Length <= 0 || globalPlayers.Select(x => x.Id).Distinct().Count() != 1)
+                if (globalPlayer == null)
                     continue;
-
-                var globalPlayer = globalPlayers.First();
 
                 logger.LogInformation($"{player.Id}. {player.Player.Name} ({player.Player.Country}), " +
                                       $"{player.Team.Name} ({player.Team.Country}) => {globalPlayer.Id}");
@@ -70,8 +101,30 @@ public sealed class GlobalPlayerLinker(
                         SwosPlayerId = player.Player.Id,
                         SwosPlayer = player.Player
                     });
-                await unitOfWork.SaveChangesAsync();
             }
+            
+            await unitOfWork.SaveChangesAsync();
         }
+    }
+
+    private static GlobalPlayer? FindGlobalPlayerExactly(
+        Dictionary<int, Dictionary<string, GlobalPlayer[]>> existGlobalPlayersFinal,
+        string playerName,
+        DbSwosTeam swosTeam)
+    {
+        if (!existGlobalPlayersFinal.TryGetValue(swosTeam.Id, out var swosPlayers))
+        {
+            return null;
+        }
+
+        if (!swosPlayers.TryGetValue(playerName, out var globalPlayers))
+        {
+            return null;
+        }
+
+        if (globalPlayers.Length == 0 || globalPlayers.Select(x => x.Id).Distinct().Count() != 1)
+            return null;
+
+        return globalPlayers.First();
     }
 }

@@ -4,20 +4,13 @@ using Swos.Domain.Models;
 
 namespace Swos.Database.Repositories;
 
-[Flags]
-public enum GlobalTeamDlo
-{
-    None = 0,
-    SwosTeam = 1,
-}
-
 public interface IGlobalTeamRepository
 {
     void Add(GlobalTeam team);
     Task<GlobalTeam?> FindEmpty();
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
-    Task<GlobalTeam[]> GetAllGlobalTeams(GlobalTeamDlo includeData);
+    Task<GlobalTeam[]> GetAllGlobalTeams();
     Task<HashSet<int>> GetAllGlobalTeamsSwosIds();
 }
 
@@ -111,16 +104,12 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
         return [.. result];
     }
 
-    public async Task<GlobalTeam[]> GetAllGlobalTeams(GlobalTeamDlo includeData)
+    public Task<GlobalTeam[]> GetAllGlobalTeams()
     {
-        var query = context.GlobalTeams.AsQueryable();
-
-        if (includeData.HasFlag(GlobalTeamDlo.SwosTeam))
-            query = query
-                .Include(x => x.SwosTeams)
-                .ThenInclude(x => x.SwosTeam);
-
-        return await query.ToArrayAsync();
+        return context.GlobalTeams
+            .Include(x => x.SwosTeams)
+            .ThenInclude(x => x.SwosTeam)
+            .ToArrayAsync();
     }
 
     public async Task<HashSet<int>> GetAllGlobalTeamsSwosIds()
