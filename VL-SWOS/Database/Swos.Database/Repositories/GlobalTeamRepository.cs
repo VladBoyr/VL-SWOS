@@ -15,7 +15,6 @@ public interface IGlobalTeamRepository
 {
     void Add(GlobalTeam team);
     Task<GlobalTeam?> FindEmpty();
-    Task<GlobalTeam[]> FindGlobalTeamsExactly(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry);
     Task<GlobalTeam[]> FindGlobalTeamsByText(string text);
     Task<GlobalTeam[]> GetAllGlobalTeams(GlobalTeamDlo includeData);
@@ -35,18 +34,6 @@ public sealed class GlobalTeamRepository(ISwosDbContext context) : IGlobalTeamRe
             .GlobalTeams
             .Where(x => x.SwosTeams.Count == 0)
             .FirstOrDefaultAsync();
-    }
-
-    public Task<GlobalTeam[]> FindGlobalTeamsExactly(string teamName, SwosCountry teamCountry)
-    {
-        return context.GlobalTeams
-            .Include(x => x.SwosTeams)
-            .ThenInclude(x => x.SwosTeam)
-            .Where(x => x
-                .SwosTeams
-                .Any(t => t.SwosTeam.Name == teamName &&
-                          t.SwosTeam.Country == teamCountry))
-            .ToArrayAsync();
     }
 
     public async Task<GlobalTeam[]> FindGlobalTeams(string teamName, SwosCountry teamCountry)
