@@ -111,7 +111,7 @@ public sealed class GlobalTeamLinker(
     public async Task<DbSwosTeam[]> TeamsToLink()
     {
         var existGlobalTeams = await globalTeamRepository.GetAllGlobalTeamsSwosIds();
-        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Teams);
+        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Players);
 
         var teams = new List<DbSwosTeam>();
 

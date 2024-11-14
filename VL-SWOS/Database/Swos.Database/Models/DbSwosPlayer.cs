@@ -12,4 +12,5 @@ public sealed class DbSwosPlayer
     public SwosPosition Position { get; set; }
     public ICollection<DbSwosSkill> Skills { get; set; } = [];
     public byte Rating { get; set; }
+    public ICollection<DbSwosTeamPlayer> Teams { get; set; } = [];
 }

@@ -63,6 +63,11 @@ public abstract class SwosDbContext(DbContextOptions options) : CommonDbContext(
             .WithOne()
             .HasForeignKey(x => x.PlayerId);
 
+        modelBuilder.Entity<DbSwosPlayer>()
+            .HasMany(x => x.Teams)
+            .WithOne(x => x.Player)
+            .HasForeignKey(x => x.PlayerId);
+        
         modelBuilder.Entity<GlobalTeam>()
             .HasMany(x => x.SwosTeams)
             .WithOne()

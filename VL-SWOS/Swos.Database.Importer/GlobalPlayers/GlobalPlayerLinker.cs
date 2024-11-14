@@ -10,6 +10,11 @@ public interface IGlobalPlayerLinker
 {
     Task<(TeamDatabase, int)[]> GlobalPlayerStats();
     Task LinksAutomate();
+    Task<bool> LinksPlayer(DbSwosTeamPlayer player, GlobalPlayer[] globalPlayers, int globalPlayerId);
+    Task<DbSwosTeamPlayer[]> PlayersToLink();
+    Task<GlobalPlayer[]> FindGlobalPlayers(string playerName, DbSwosTeam playerTeam);
+    Task<GlobalPlayer[]> FindGlobalPlayersByText(string text);
+    Task MergeGlobalPlayers(GlobalPlayer[] globalPlayers, string? mergeQuery);
 }
 
 public sealed class GlobalPlayerLinker(
@@ -92,7 +97,7 @@ public sealed class GlobalPlayerLinker(
                 if (globalPlayer == null)
                     continue;
 
-                logger.LogInformation($"{player.Id}. {player.Player.Name} ({player.Player.Country}), " +
+                logger.LogInformation($"{player.Player.Id}. {player.Player.Name} ({player.Player.Country}), " +
                                       $"{player.Team.Name} ({player.Team.Country}) => {globalPlayer.Id}");
 
                 globalPlayer.SwosPlayers.Add(
@@ -103,6 +108,93 @@ public sealed class GlobalPlayerLinker(
                     });
             }
             
+            await unitOfWork.SaveChangesAsync();
+        }
+    }
+
+    public async Task<bool> LinksPlayer(DbSwosTeamPlayer player, GlobalPlayer[] globalPlayers, int globalPlayerId)
+    {
+        GlobalPlayer? globalPlayer;
+
+        if (globalPlayerId == 0)
+        {
+            globalPlayer = await globalPlayerRepository.FindEmpty();
+            if (globalPlayer == null)
+            {
+                globalPlayer = new GlobalPlayer();
+                globalPlayerRepository.Add(globalPlayer);
+            }
+        }
+        else
+        {
+            globalPlayer = globalPlayers.SingleOrDefault(x => x.Id == globalPlayerId);
+            if (globalPlayer == null)
+                return false;
+        }
+
+        globalPlayer.SwosPlayers.Add(
+            new GlobalPlayerSwos
+            {
+                SwosPlayerId = player.Id,
+                SwosPlayer = player.Player
+            });
+        await unitOfWork.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<DbSwosTeamPlayer[]> PlayersToLink()
+    {
+        var existGlobalPlayers = await globalPlayerRepository.GetAllGlobalPlayersSwosIds();
+        var teamDatabases = await teamDatabaseRepository.GetTeamDatabases(TeamDatabaseDlo.Players);
+
+        var teamPlayers = new List<DbSwosTeamPlayer>();
+
+        foreach (var teamDatabase in teamDatabases.OrderByDescending(x =>
+                     x.Teams.Count(t => !existGlobalPlayers.Contains(t.Id))))
+        {
+            teamPlayers.AddRange(teamDatabase.Teams
+                .SelectMany(x => x.Players)
+                .Where(x => !existGlobalPlayers.Contains(x.PlayerId)));
+        }
+
+        return [.. teamPlayers];
+    }
+
+    public Task<GlobalPlayer[]> FindGlobalPlayers(string playerName, DbSwosTeam playerTeam)
+    {
+        return globalPlayerRepository.FindGlobalPlayers(playerName, playerTeam);
+    }
+
+    public Task<GlobalPlayer[]> FindGlobalPlayersByText(string text)
+    {
+        return globalPlayerRepository.FindGlobalPlayersByText(text);
+    }
+
+    public async Task MergeGlobalPlayers(GlobalPlayer[] globalPlayers, string? mergeQuery)
+    {
+        var mergeIds = mergeQuery?.Split(' ');
+        if (mergeIds?.Length == 2 &&
+            int.TryParse(mergeIds[0], out var fromMergeId) &&
+            int.TryParse(mergeIds[1], out var toMergeId))
+        {
+            var fromGlobalPlayer = globalPlayers.SingleOrDefault(x => x.Id == fromMergeId);
+            var toGlobalPlayer = globalPlayers.SingleOrDefault(x => x.Id == toMergeId);
+
+            if (fromGlobalPlayer == null || toGlobalPlayer == null)
+                return;
+
+            foreach (var fromPlayer in fromGlobalPlayer.SwosPlayers)
+            {
+                toGlobalPlayer.SwosPlayers.Add(
+                    new GlobalPlayerSwos
+                    {
+                        SwosPlayerId = fromPlayer.SwosPlayer.Id,
+                        SwosPlayer = fromPlayer.SwosPlayer
+                    });
+            }
+
+            fromGlobalPlayer.SwosPlayers.Clear();
             await unitOfWork.SaveChangesAsync();
         }
     }
